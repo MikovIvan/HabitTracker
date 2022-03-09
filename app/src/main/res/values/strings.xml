@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Habit Tracker</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="name_of_habit">Name of habit</string>
+    <string name="description">Description</string>
+    <string name="good">good</string>
+    <string name="bad">bad</string>
+    <string name="choose_habit_type">Choose habit type:</string>
+    <string name="enter_habit_periodicity">Enter habit periodicity</string>
+    <string name="enter_number_of_executions">Enter number of executions</string>
+</resources>
