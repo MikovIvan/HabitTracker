@@ -9,4 +9,22 @@
     <string name="choose_habit_type">Choose habit type:</string>
     <string name="enter_habit_periodicity">Enter habit periodicity</string>
     <string name="enter_number_of_executions">Enter number of executions</string>
+
+    <string name="rgb_formatted">R:%d G:%d B:%d</string>
+    <string name="hsv_formatted">H:%f S:%f V:%f</string>
+    <string name="btn_update_text">Update</string>
+    <string name="btn_save_text">Save</string>
+    <string name="tv_habit_name">Name of Habit: %1$s</string>
+    <string name="tv_habit_description">Description: \n %1$s</string>
+    <string name="tv_habit_periodicity">Periodicity: %1$s</string>
+    <string name="tv_habit_priority">Priority: %1$s</string>
+    <string name="type_good">Type: good</string>
+    <string name="type_bad">Type: bad</string>
+
+
+    <string-array name="priority">
+        <item>High</item>
+        <item>Medium</item>
+        <item>Low</item>
+    </string-array>
 </resources>
