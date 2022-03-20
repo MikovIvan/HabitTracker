@@ -10,11 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HabitTracker">
         <activity
-            android:name=".ui.habit.HabitActivity"
-            android:screenOrientation="portrait"
-            android:exported="true" />
-        <activity
-            android:name=".ui.main.MainActivity"
+            android:name=".ui.MainActivity"
             android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>

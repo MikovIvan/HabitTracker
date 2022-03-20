@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation"
+    app:startDestination="@id/nav_habits">
+
+    <fragment
+        android:id="@+id/nav_habits"
+        android:name="ru.mikov.habittracker.ui.habits.HabitsFragment"
+        android:label="@string/habits">
+        <action
+            android:id="@+id/action_nav_habits_to_nav_habit"
+            app:destination="@id/nav_habit" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_habit"
+        android:name="ru.mikov.habittracker.ui.habit.HabitFragment"
+        android:label="@string/habit">
+        <argument
+            android:name="habit"
+            android:defaultValue="@null"
+            app:argType="ru.mikov.habittracker.data.entities.Habit"
+            app:nullable="true" />
+    </fragment>
+</navigation>

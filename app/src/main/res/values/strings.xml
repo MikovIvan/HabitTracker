@@ -20,6 +20,8 @@
     <string name="tv_habit_priority">Priority: %1$s</string>
     <string name="type_good">Type: good</string>
     <string name="type_bad">Type: bad</string>
+    <string name="habits">Habits</string>
+    <string name="habit">Habit</string>
 
 
     <string-array name="priority">

@@ -9,38 +9,43 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.setMargins
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import ru.mikov.habittracker.R
 import ru.mikov.habittracker.data.entities.Habit
-import ru.mikov.habittracker.databinding.ActivityHabitBinding
-import ru.mikov.habittracker.ui.main.EXTRA_HABIT
+import ru.mikov.habittracker.databinding.FragmentHabitBinding
 import java.util.*
 
 
-class HabitActivity : AppCompatActivity() {
+class HabitFragment : Fragment(R.layout.fragment_habit) {
 
-    private val viewBinding: ActivityHabitBinding by viewBinding()
+    private val args: HabitFragmentArgs by navArgs()
+    private val viewBinding: FragmentHabitBinding by viewBinding()
     private val viewModel: HabitViewModel by viewModels()
     private var habit: Habit? = null
     private var pickedColor = -1
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_habit)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        habit = intent.getSerializableExtra(EXTRA_HABIT) as? Habit
+        if (args.habit != null) {
+            habit = args.habit
+        }
+
+//        habit = intent.getSerializableExtra(EXTRA_HABIT) as? Habit
 
         initSpinner(habit)
         addColorPicker(viewBinding.llt)
         initViews(viewBinding)
     }
 
-    private fun initViews(binding: ActivityHabitBinding) {
+    private fun initViews(binding: FragmentHabitBinding) {
         with(binding) {
             if (habit != null) {
                 etHabitName.setText(habit!!.name)
@@ -50,12 +55,13 @@ class HabitActivity : AppCompatActivity() {
                 rgHabitType.check((rgHabitType.getChildAt(habit!!.type) as RadioButton).id)
                 btnSave.text = getString(R.string.btn_update_text)
                 ivSelectedColor.setColorFilter(habit!!.color)
+                pickedColor = habit!!.color
                 val a = FloatArray(3)
-                Color.colorToHSV(habit!!.color, a)
+                Color.colorToHSV(pickedColor, a)
                 tvHsv.text = resources.getString(R.string.hsv_formatted, a[0], a[1], a[2])
                 tvRgb.text = resources.getString(
                     R.string.rgb_formatted,
-                    Color.red(habit!!.color), Color.green(habit!!.color), Color.blue(habit!!.color)
+                    Color.red(pickedColor), Color.green(pickedColor), Color.blue(pickedColor)
                 )
             } else {
                 btnSave.text = getString(R.string.btn_save_text)
@@ -64,13 +70,13 @@ class HabitActivity : AppCompatActivity() {
             btnSave.setOnClickListener {
                 if (isValidate()) {
                     if (habit != null) updateHabit() else saveHabit()
-                    finish()
+                    findNavController().navigate(R.id.nav_habits)
                 }
             }
         }
     }
 
-    private fun ActivityHabitBinding.saveHabit() {
+    private fun FragmentHabitBinding.saveHabit() {
         habit = Habit(
             id = UUID.randomUUID().toString(),
             name = etHabitName.text.toString(),
@@ -84,7 +90,7 @@ class HabitActivity : AppCompatActivity() {
         viewModel.addHabit(habit!!)
     }
 
-    private fun ActivityHabitBinding.updateHabit() {
+    private fun FragmentHabitBinding.updateHabit() {
         val updatedHabit = habit!!.copy(
             id = habit?.id ?: UUID.randomUUID().toString(),
             name = etHabitName.text.toString(),
@@ -129,7 +135,7 @@ class HabitActivity : AppCompatActivity() {
 
         for (i in 0..15) {
 
-            val imageView = ImageView(this)
+            val imageView = ImageView(context)
             imageView.setImageResource(R.drawable.square)
             imageView.layoutParams = layoutParams
             imageView.setBackgroundResource(R.drawable.border_black)
@@ -162,7 +168,7 @@ class HabitActivity : AppCompatActivity() {
 
     private fun initSpinner(habit: Habit?) {
         val adapter: ArrayAdapter<CharSequence> = ArrayAdapter.createFromResource(
-            this,
+            requireContext(),
             R.array.priority,
             android.R.layout.simple_spinner_item
         )
