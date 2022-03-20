@@ -22,6 +22,7 @@
     <string name="type_bad">Type: bad</string>
     <string name="habits">Habits</string>
     <string name="habit">Habit</string>
+    <string name="about">About</string>
 
 
     <string-array name="priority">
