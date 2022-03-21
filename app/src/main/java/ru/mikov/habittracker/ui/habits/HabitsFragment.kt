@@ -4,20 +4,21 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import ru.mikov.habittracker.R
+import ru.mikov.habittracker.data.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitsBinding
+import ru.mikov.habittracker.ui.ViewPagerFragmentDirections
 import ru.mikov.habittracker.ui.adapters.HabitAdapter
 
-class HabitsFragment : Fragment(R.layout.fragment_habits) {
+class HabitsFragment(val type: HabitType) : Fragment(R.layout.fragment_habits) {
 
     private val viewBinding: FragmentHabitsBinding by viewBinding()
     private val viewModel: HabitsViewModel by viewModels()
     private val habitsAdapter: HabitAdapter = HabitAdapter {
-        val action = HabitsFragmentDirections.actionNavHabitsToNavHabit(it)
+        val action = ViewPagerFragmentDirections.actionNavViewPagerToNavHabit(it)
         findNavController().navigate(action)
     }
 
@@ -35,9 +36,10 @@ class HabitsFragment : Fragment(R.layout.fragment_habits) {
             }
         }
 
-        viewModel.getHabits().observe(requireActivity(), Observer {
-            habitsAdapter.submitList(it)
-        })
+        viewModel.getHabits().observe(requireActivity()) { habits ->
+            val filteredList = habits.filter { habit -> habit.type == type }
+            habitsAdapter.submitList(filteredList)
+        }
     }
 
 }

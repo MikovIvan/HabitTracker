@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RadioButton
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.setMargins
@@ -19,6 +18,7 @@ import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import ru.mikov.habittracker.R
 import ru.mikov.habittracker.data.entities.Habit
+import ru.mikov.habittracker.data.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitBinding
 import java.util.*
 
@@ -30,6 +30,7 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
     private val viewModel: HabitViewModel by viewModels()
     private var habit: Habit? = null
     private var pickedColor = -1
+    private var habitType: HabitType = HabitType.GOOD
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -37,9 +38,6 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
         if (args.habit != null) {
             habit = args.habit
         }
-
-//        habit = intent.getSerializableExtra(EXTRA_HABIT) as? Habit
-
         initSpinner(habit)
         addColorPicker(viewBinding.llt)
         initViews(viewBinding)
@@ -52,7 +50,10 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
                 etHabitDescription.setText(habit!!.description)
                 etHabitPeriodicity.setText(habit!!.periodicity)
                 etNumberOfExecutions.setText(habit!!.numberOfExecutions)
-                rgHabitType.check((rgHabitType.getChildAt(habit!!.type) as RadioButton).id)
+                when (habit!!.type) {
+                    HabitType.BAD -> rgHabitType.check(R.id.rb_bad)
+                    HabitType.GOOD -> rgHabitType.check(R.id.rb_good)
+                }
                 btnSave.text = getString(R.string.btn_update_text)
                 ivSelectedColor.setColorFilter(habit!!.color)
                 pickedColor = habit!!.color
@@ -70,7 +71,14 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
             btnSave.setOnClickListener {
                 if (isValidate()) {
                     if (habit != null) updateHabit() else saveHabit()
-                    findNavController().navigate(R.id.nav_habits)
+                    findNavController().navigate(R.id.nav_view_pager)
+                }
+            }
+
+            rgHabitType.setOnCheckedChangeListener { radioGroup, checkedId ->
+                when (checkedId) {
+                    R.id.rb_good -> habitType = HabitType.GOOD
+                    R.id.rb_bad -> habitType = HabitType.BAD
                 }
             }
         }
@@ -82,7 +90,7 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
             name = etHabitName.text.toString(),
             description = etHabitDescription.text.toString(),
             priority = spinnerHabitPriority.selectedItem.toString(),
-            type = rgHabitType.indexOfChild(rgHabitType.findViewById(rgHabitType.checkedRadioButtonId)),
+            type = habitType,
             periodicity = etHabitPeriodicity.text.toString(),
             numberOfExecutions = etNumberOfExecutions.text.toString(),
             color = pickedColor
@@ -96,7 +104,7 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
             name = etHabitName.text.toString(),
             description = etHabitDescription.text.toString(),
             priority = spinnerHabitPriority.selectedItem.toString(),
-            type = rgHabitType.indexOfChild(rgHabitType.findViewById(rgHabitType.checkedRadioButtonId)),
+            type = habitType,
             periodicity = etHabitPeriodicity.text.toString(),
             numberOfExecutions = etNumberOfExecutions.text.toString(),
             color = pickedColor

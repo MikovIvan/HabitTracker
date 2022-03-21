@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.mikov.habittracker.R
 import ru.mikov.habittracker.data.entities.Habit
+import ru.mikov.habittracker.data.entities.HabitType
 import ru.mikov.habittracker.databinding.ItemHabitBinding
 
 class HabitAdapter(
@@ -55,8 +56,8 @@ class HabitViewHolder(
                 habit.priority
             )
             tvHabitType.text = when (habit.type) {
-                0 -> this@HabitViewHolder.itemView.context.getString(R.string.type_good)
-                else -> this@HabitViewHolder.itemView.context.getString(R.string.type_bad)
+                HabitType.GOOD -> this@HabitViewHolder.itemView.context.getString(R.string.type_good)
+                HabitType.BAD -> this@HabitViewHolder.itemView.context.getString(R.string.type_bad)
             }
             cvHabit.setCardBackgroundColor(habit.color)
         }
