@@ -20,8 +20,8 @@ class ViewPagerFragment : Fragment(R.layout.fragment_view_pager) {
         super.onViewCreated(view, savedInstanceState)
 
         val fragmentList = arrayListOf<Fragment>(
-            HabitsFragment(HabitType.GOOD),
-            HabitsFragment(HabitType.BAD)
+            HabitsFragment.newInstance("Good", HabitType.GOOD),
+            HabitsFragment.newInstance("Bad", HabitType.BAD)
         )
 
         val adapter = ViewPagerAdapter(
