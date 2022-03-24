@@ -41,5 +41,9 @@
         <action
             android:id="@+id/action_nav_view_pager_to_nav_habit"
             app:destination="@id/nav_habit" />
+        <argument
+            android:name="type"
+            android:defaultValue="GOOD"
+            app:argType="ru.mikov.habittracker.data.entities.HabitType" />
     </fragment>
 </navigation>

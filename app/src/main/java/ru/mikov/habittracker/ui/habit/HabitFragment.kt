@@ -71,7 +71,9 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
             btnSave.setOnClickListener {
                 if (isValidate()) {
                     if (habit != null) updateHabit() else saveHabit()
-                    findNavController().navigate(R.id.nav_view_pager)
+                    val action =
+                        HabitFragmentDirections.actionNavHabitToViewPagerFragment(type = habitType)
+                    findNavController().navigate(action)
                 }
             }
 
