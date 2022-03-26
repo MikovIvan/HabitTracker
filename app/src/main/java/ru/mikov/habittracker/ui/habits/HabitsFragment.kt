@@ -2,6 +2,7 @@ package ru.mikov.habittracker.ui.habits
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -29,10 +30,6 @@ class HabitsFragment : Fragment(R.layout.fragment_habits) {
         habitType = arguments?.get(ARGS_TYPE) as HabitType
 
         with(viewBinding) {
-            fabAddHabit.setOnClickListener {
-                findNavController().navigate(R.id.nav_habit)
-            }
-
             rvHabits.apply {
                 layoutManager = LinearLayoutManager(context)
                 adapter = habitsAdapter
@@ -51,12 +48,12 @@ class HabitsFragment : Fragment(R.layout.fragment_habits) {
         private const val ARGS_TYPE = "args_type"
 
         fun newInstance(name: String, habitType: HabitType): HabitsFragment {
-            val fragment = HabitsFragment()
-            val bundle = Bundle()
-            bundle.putString(ARGS_NAME, name)
-            bundle.putSerializable(ARGS_TYPE, habitType)
-            fragment.arguments = bundle
-            return fragment
+            return HabitsFragment().apply {
+                arguments = bundleOf(
+                    ARGS_NAME to name,
+                    ARGS_TYPE to habitType
+                )
+            }
         }
     }
 

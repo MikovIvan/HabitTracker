@@ -4,20 +4,23 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import ru.mikov.habittracker.data.entities.HabitType
+import ru.mikov.habittracker.ui.habits.HabitsFragment
 
 class ViewPagerAdapter(
-    list: ArrayList<Fragment>,
     fm: FragmentManager,
     lifecycle: Lifecycle
 ) : FragmentStateAdapter(fm, lifecycle) {
 
-    private val fragmentList = list
-
     override fun getItemCount(): Int {
-        return fragmentList.size
+        return 2
     }
 
     override fun createFragment(position: Int): Fragment {
-        return fragmentList[position]
+        return when (position) {
+            0 -> HabitsFragment.newInstance("Good", HabitType.GOOD)
+            else -> HabitsFragment.newInstance("Bad", HabitType.BAD)
+        }
+
     }
 }

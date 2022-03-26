@@ -16,9 +16,9 @@ data class Habit(
     var numberOfExecutions: String
 ) : Serializable
 
-enum class HabitType(@StringRes val stringRes: Int) {
-    BAD(R.string.bad),
-    GOOD(R.string.good)
+enum class HabitType(@StringRes val stringRes: Int, val numOfTab: Int) {
+    BAD(R.string.bad, 1),
+    GOOD(R.string.good, 0)
 }
 
 
