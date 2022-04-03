@@ -73,7 +73,9 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
             btnSave.setOnClickListener {
                 if (isValidate()) {
                     if (habit != null) updateHabit() else saveHabit()
-                    findNavController().navigateUp()
+                    val action =
+                        HabitFragmentDirections.actionNavHabitToViewPagerFragment(habitType)
+                    findNavController().navigate(action)
                 }
             }
 
@@ -98,8 +100,6 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
                 numberOfExecutions = etNumberOfExecutions.text.toString(),
                 color = pickedColor
             )
-            Log.d("TAG", "habitType ${habitType.numOfTab}")
-//            viewModel.saveCurrentTab(habitType.numOfTab)
             PrefManager.saveSelectedTab(habitType.numOfTab)
             viewModel.addHabit(habit!!)
         }
@@ -118,8 +118,7 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
                 color = pickedColor
             )
             Log.d("TAG", "habitType ${habitType.numOfTab}")
-            viewModel.saveCurrentTab(habitType.numOfTab)
-//            PrefManager.saveSelectedTab(habitType.numOfTab)
+            PrefManager.saveSelectedTab(habitType.numOfTab)
             viewModel.update(updatedHabit)
         }
     }

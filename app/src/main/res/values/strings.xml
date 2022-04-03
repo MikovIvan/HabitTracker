@@ -24,6 +24,19 @@
     <string name="habit">Habit</string>
     <string name="about">About</string>
 
+    <string name="sort_and_filter">Sort and filter</string>
+    <string name="sort_by_name">Sort by name</string>
+    <string name="sorting">Sorting</string>
+    <string name="ascending">By ascending</string>
+    <string name="descending">By descending</string>
+    <string name="by_name">By name</string>
+    <string name="search_and_filtration">search and filtration</string>
+    <string name="find">Find</string>
+    <string name="apply">Apply</string>
+    <string name="by_periodicity">By periodicity</string>
+    <string name="cancel">Сancel</string>
+    <string name="search_for">Search for: %1$s</string>
+
 
     <string-array name="priority">
         <item>High</item>

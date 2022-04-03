@@ -2,9 +2,11 @@ package ru.mikov.habittracker.data.repositories
 
 import androidx.lifecycle.MutableLiveData
 import ru.mikov.habittracker.data.entities.Habit
+import ru.mikov.habittracker.ui.habits.State
 
 object RootRepository {
     val habits = MutableLiveData<List<Habit>>()
+    private val filteredHabits = MutableLiveData<List<Habit>>()
 
     fun addHabit(habit: Habit) {
         val copy = habits.value.orEmpty().toMutableList()
@@ -34,5 +36,27 @@ object RootRepository {
 
         habits.postValue(copy)
     }
+
+    fun getData(state: State): MutableLiveData<List<Habit>> {
+        val copy = habits.value.orEmpty().toMutableList()
+        val filteredList = copy.filter { habit -> habit.type == state.type }
+        var result = filteredList
+
+        if (state.typeOfSort == 0 && state.sortBy) {
+            result = filteredList.sortedBy { it.name }
+        } else if (state.typeOfSort == 0 && !state.sortBy) {
+            result = filteredList.sortedByDescending { it.name }
+        } else if (state.typeOfSort == 1 && state.sortBy) {
+            result = filteredList.sortedBy { it.periodicity }
+        } else if (state.typeOfSort == 1 && !state.sortBy) {
+            result = filteredList.sortedByDescending { it.periodicity }
+        }
+        if (state.searchQuery.isNotBlank()) {
+            result = filteredList.filter { it.name.startsWith(state.searchQuery.uppercase()) }
+        }
+        filteredHabits.postValue(result)
+        return filteredHabits
+    }
+
 
 }

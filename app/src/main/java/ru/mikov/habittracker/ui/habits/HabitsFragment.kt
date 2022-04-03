@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -17,7 +17,7 @@ import ru.mikov.habittracker.ui.adapters.HabitAdapter
 class HabitsFragment : Fragment(R.layout.fragment_habits) {
 
     private val viewBinding: FragmentHabitsBinding by viewBinding()
-    private val viewModel: HabitsViewModel by viewModels()
+    private val viewModel: HabitsViewModel by activityViewModels()
     private lateinit var habitType: HabitType
     private val habitsAdapter: HabitAdapter = HabitAdapter {
         val action = ViewPagerFragmentDirections.actionNavViewPagerToNavHabit(it)
@@ -36,12 +36,15 @@ class HabitsFragment : Fragment(R.layout.fragment_habits) {
             }
         }
 
-        viewModel.getHabits().observe(requireActivity()) { habits ->
-            val filteredList = habits.filter { habit -> habit.type == habitType }
-            habitsAdapter.submitList(filteredList)
+        viewModel.habitsList.observe(viewLifecycleOwner) {
+            habitsAdapter.submitList(it)
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.setType(habitType)
+    }
 
     companion object {
         private const val ARGS_NAME = "args_name"

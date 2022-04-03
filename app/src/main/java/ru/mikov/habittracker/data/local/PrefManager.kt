@@ -23,4 +23,11 @@ object PrefManager {
     fun getSelectedTab(): Int {
         return preferences.getInt(SELECTED_TAB, 0)
     }
+
+    fun clearPrefs() {
+        preferences.edit().apply {
+            clear()
+            apply()
+        }
+    }
 }
