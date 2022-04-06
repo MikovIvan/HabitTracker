@@ -3,7 +3,6 @@ package ru.mikov.habittracker.ui.habit
 import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -18,11 +17,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import ru.mikov.habittracker.R
-import ru.mikov.habittracker.data.entities.Habit
-import ru.mikov.habittracker.data.entities.HabitType
-import ru.mikov.habittracker.data.local.PrefManager
+import ru.mikov.habittracker.data.local.entities.Habit
+import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitBinding
-import java.util.*
 
 
 class HabitFragment : Fragment(R.layout.fragment_habit) {
@@ -37,8 +34,8 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (args.habit != null) {
-            habit = args.habit
+        if (args.habitId != -1) {
+            habit = viewModel.getHabit(args.habitId)
         }
         initSpinner(habit)
         addColorPicker(viewBinding.llt)
@@ -91,7 +88,6 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
     private fun saveHabit() {
         with(viewBinding) {
             habit = Habit(
-                id = UUID.randomUUID().toString(),
                 name = etHabitName.text.toString(),
                 description = etHabitDescription.text.toString(),
                 priority = spinnerHabitPriority.selectedItem.toString(),
@@ -100,7 +96,6 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
                 numberOfExecutions = etNumberOfExecutions.text.toString(),
                 color = pickedColor
             )
-            PrefManager.saveSelectedTab(habitType.numOfTab)
             viewModel.addHabit(habit!!)
         }
     }
@@ -108,7 +103,6 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
     private fun updateHabit() {
         with(viewBinding) {
             val updatedHabit = habit!!.copy(
-                id = habit?.id ?: UUID.randomUUID().toString(),
                 name = etHabitName.text.toString(),
                 description = etHabitDescription.text.toString(),
                 priority = spinnerHabitPriority.selectedItem.toString(),
@@ -117,8 +111,6 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
                 numberOfExecutions = etNumberOfExecutions.text.toString(),
                 color = pickedColor
             )
-            Log.d("TAG", "habitType ${habitType.numOfTab}")
-            PrefManager.saveSelectedTab(habitType.numOfTab)
             viewModel.update(updatedHabit)
         }
     }

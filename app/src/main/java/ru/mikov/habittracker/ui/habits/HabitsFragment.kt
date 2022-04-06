@@ -9,10 +9,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import ru.mikov.habittracker.R
-import ru.mikov.habittracker.data.entities.HabitType
+import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitsBinding
 import ru.mikov.habittracker.ui.ViewPagerFragmentDirections
 import ru.mikov.habittracker.ui.adapters.HabitAdapter
+
 
 class HabitsFragment : Fragment(R.layout.fragment_habits) {
 
@@ -20,7 +21,7 @@ class HabitsFragment : Fragment(R.layout.fragment_habits) {
     private val viewModel: HabitsViewModel by activityViewModels()
     private lateinit var habitType: HabitType
     private val habitsAdapter: HabitAdapter = HabitAdapter {
-        val action = ViewPagerFragmentDirections.actionNavViewPagerToNavHabit(it)
+        val action = ViewPagerFragmentDirections.actionNavViewPagerToNavHabit(it.id)
         findNavController().navigate(action)
     }
 

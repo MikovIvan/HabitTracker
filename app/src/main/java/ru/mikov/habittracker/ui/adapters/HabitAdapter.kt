@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.mikov.habittracker.R
-import ru.mikov.habittracker.data.entities.Habit
-import ru.mikov.habittracker.data.entities.HabitType
+import ru.mikov.habittracker.data.local.entities.Habit
+import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.ItemHabitBinding
 
 class HabitAdapter(

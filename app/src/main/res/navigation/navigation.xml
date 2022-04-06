@@ -20,10 +20,9 @@
         android:name="ru.mikov.habittracker.ui.habit.HabitFragment"
         android:label="@string/habit">
         <argument
-            android:name="habit"
-            android:defaultValue="@null"
-            app:argType="ru.mikov.habittracker.data.entities.Habit"
-            app:nullable="true" />
+            android:name="habitId"
+            android:defaultValue="-1"
+            app:argType="integer" />
         <action
             android:id="@+id/action_nav_habit_to_viewPagerFragment"
             app:destination="@id/nav_view_pager"
@@ -48,7 +47,7 @@
         <argument
             android:name="type"
             android:defaultValue="GOOD"
-            app:argType="ru.mikov.habittracker.data.entities.HabitType" />
+            app:argType="ru.mikov.habittracker.data.local.entities.HabitType" />
     </fragment>
     <dialog
         android:id="@+id/dialog_filter"

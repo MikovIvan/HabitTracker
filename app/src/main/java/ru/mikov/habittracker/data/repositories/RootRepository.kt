@@ -1,62 +1,85 @@
 package ru.mikov.habittracker.data.repositories
 
-import androidx.lifecycle.MutableLiveData
-import ru.mikov.habittracker.data.entities.Habit
-import ru.mikov.habittracker.ui.habits.State
+import androidx.lifecycle.LiveData
+import androidx.sqlite.db.SimpleSQLiteQuery
+import ru.mikov.habittracker.data.local.DbManager.db
+import ru.mikov.habittracker.data.local.entities.Habit
+import ru.mikov.habittracker.data.local.entities.HabitType
+import ru.mikov.habittracker.data.local.entities.HabitType.GOOD
 
 object RootRepository {
-    val habits = MutableLiveData<List<Habit>>()
-    private val filteredHabits = MutableLiveData<List<Habit>>()
+    private var habitsDao = db.habitsDao()
 
     fun addHabit(habit: Habit) {
-        val copy = habits.value.orEmpty().toMutableList()
-        copy.add(habit)
-        habits.postValue(copy)
+        habitsDao.insert(habit)
+    }
+
+    fun getHabit(id: Int): Habit {
+        return habitsDao.findHabitById(id)
     }
 
     fun update(updatedHabit: Habit) {
-        val copy = habits.value.orEmpty().toMutableList()
-
-        copy.forEachIndexed { index, habit ->
-            val changedHabit = copy.find { habit.id == updatedHabit.id }
-            if (changedHabit != null) {
-                val replacement = habit.copy(
-                    id = updatedHabit.id,
-                    name = updatedHabit.name,
-                    description = updatedHabit.description,
-                    priority = updatedHabit.priority,
-                    type = updatedHabit.type,
-                    periodicity = updatedHabit.periodicity,
-                    numberOfExecutions = updatedHabit.numberOfExecutions,
-                    color = updatedHabit.color
-                )
-                copy[index] = replacement
-            }
-        }
-
-        habits.postValue(copy)
+        habitsDao.update(updatedHabit)
     }
 
-    fun getData(state: State): MutableLiveData<List<Habit>> {
-        val copy = habits.value.orEmpty().toMutableList()
-        val filteredList = copy.filter { habit -> habit.type == state.type }
-        var result = filteredList
-
-        if (state.typeOfSort == 0 && state.sortBy) {
-            result = filteredList.sortedBy { it.name }
-        } else if (state.typeOfSort == 0 && !state.sortBy) {
-            result = filteredList.sortedByDescending { it.name }
-        } else if (state.typeOfSort == 1 && state.sortBy) {
-            result = filteredList.sortedBy { it.periodicity }
-        } else if (state.typeOfSort == 1 && !state.sortBy) {
-            result = filteredList.sortedByDescending { it.periodicity }
-        }
-        if (state.searchQuery.isNotBlank()) {
-            result = filteredList.filter { it.name.startsWith(state.searchQuery.uppercase()) }
-        }
-        filteredHabits.postValue(result)
-        return filteredHabits
+    fun rawQueryArticles(filter: HabitFilter): LiveData<List<Habit>> {
+        return habitsDao.findArticlesByRaw(SimpleSQLiteQuery(filter.toQuery()))
     }
 
+}
 
+class HabitFilter(
+    private val searchQuery: String? = null,
+    private val sortBy: Boolean = true,
+    private val typeOfSort: Int = -1,
+    val type: HabitType = GOOD,
+) {
+    fun toQuery(): String {
+        val qb = QueryBuilder()
+        qb.table("habits")
+        qb.appendWhere("type LIKE '$type'")
+
+        if (searchQuery != null) qb.appendWhere("name LIKE '%$searchQuery%'")
+        if (typeOfSort == 0) qb.orderBy("name") else qb.orderBy("periodicity")
+        if (sortBy && typeOfSort != -1 && searchQuery != null) qb.isDesc(false) else qb.isDesc(true)
+
+        return qb.build()
+    }
+}
+
+class QueryBuilder() {
+    private var table: String? = null
+    private var selectColumns: String = "*"
+    private var joinTables: String? = null
+    private var whereCondition: String? = null
+    private var order: String? = null
+    private var sort: String? = null
+
+    fun build(): String {
+        check(table != null) { "table must be not null" }
+        val strBuilder = StringBuilder("SELECT ")
+            .append("$selectColumns ")
+            .append("FROM $table ")
+
+        if (joinTables != null) strBuilder.append(joinTables)
+        if (whereCondition != null) strBuilder.append(whereCondition)
+        if (order != null) strBuilder.append(order)
+        if (sort != null) strBuilder.append(sort)
+        return strBuilder.toString()
+    }
+
+    fun table(table: String): QueryBuilder = apply { this.table = table }
+
+    fun orderBy(column: String): QueryBuilder = apply {
+        order = "ORDER BY $column "
+    }
+
+    fun appendWhere(condition: String, logic: String = "AND"): QueryBuilder = apply {
+        if (whereCondition.isNullOrEmpty()) whereCondition = "WHERE $condition "
+        else whereCondition += "$logic $condition "
+    }
+
+    fun isDesc(isDesc: Boolean = true): QueryBuilder = apply {
+        sort = if (isDesc) "DESC" else "ASC"
+    }
 }

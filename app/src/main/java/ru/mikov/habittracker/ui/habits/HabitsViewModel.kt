@@ -4,8 +4,9 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import ru.mikov.habittracker.data.entities.Habit
-import ru.mikov.habittracker.data.entities.HabitType
+import ru.mikov.habittracker.data.local.entities.Habit
+import ru.mikov.habittracker.data.local.entities.HabitType
+import ru.mikov.habittracker.data.repositories.HabitFilter
 import ru.mikov.habittracker.data.repositories.RootRepository
 
 class HabitsViewModel : ViewModel() {
@@ -52,23 +53,24 @@ class HabitsViewModel : ViewModel() {
         addSource(typeOfSort) {
             value = value?.copy(typeOfSort = it)
         }
-
-        //чтобы при добавлении привычки фильтр отрабатывал
-        addSource(repository.habits) {
-            value = value?.copy(list = it)
-        }
     }
 
     val habitsList = Transformations.switchMap(state) {
-        return@switchMap repository.getData(it)
+        val filter = it.toHabitFilter()
+        return@switchMap repository.rawQueryArticles(filter)
     }
 
 }
 
 data class State(
-    val searchQuery: String = "",
+    val searchQuery: String? = null,
     val sortBy: Boolean = true,
     val typeOfSort: Int = -1,
     val type: HabitType = HabitType.GOOD,
     val list: List<Habit> = listOf()
-)
+) {
+    fun toHabitFilter(): HabitFilter =
+        HabitFilter(
+            searchQuery, sortBy, typeOfSort, type
+        )
+}
