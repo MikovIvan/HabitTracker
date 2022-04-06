@@ -34,53 +34,47 @@ class FilterDialog : BottomSheetDialogFragment() {
                 etSearch.setText(it.searchQuery)
 
                 when (it.typeOfSort) {
-                    0 -> tvByName.setTextColor(Color.RED)
-                    1 -> tvByPeriodicity.setTextColor(Color.RED)
+                    0 -> {
+                        tvByName.setTextColor(Color.RED)
+                        tvByPeriodicity.setTextColor(Color.BLACK)
+                    }
+                    1 -> {
+                        tvByName.setTextColor(Color.BLACK)
+                        tvByPeriodicity.setTextColor(Color.RED)
+                    }
                     else -> {
                         tvByName.setTextColor(Color.BLACK)
                         tvByPeriodicity.setTextColor(Color.BLACK)
                     }
                 }
 
-                when (it.sortBy) {
-                    true -> tvAscendingDescending.text = getString(R.string.ascending)
-                    else -> tvAscendingDescending.text = getString(R.string.descending)
-                }
+                if (it.isAscending) tvAscendingDescending.text = getString(R.string.ascending) else
+                    tvAscendingDescending.text = getString(R.string.descending)
             }
 
-
             btnApply.setOnClickListener {
-                viewModel.search(etSearch.text.toString())
-                viewModel.setTypeOfSort(viewModel.sortParam)
-                viewModel.setOrder(!viewModel.isAscending)
+                viewModel.updateState { it.copy(searchQuery = etSearch.text.toString()) }
                 dismiss()
             }
 
             btnCancel.setOnClickListener {
-                viewModel.search("")
-                viewModel.sortParam = -1
-                viewModel.isAscending = false
-                viewModel.setTypeOfSort(viewModel.sortParam)
-                viewModel.setOrder(!viewModel.isAscending)
+                viewModel.updateState {
+                    it.copy(
+                        searchQuery = "",
+                        typeOfSort = -1,
+                        isAscending = false
+                    )
+                }
                 dismiss()
             }
 
             tvAscendingDescending.setOnClickListener {
-                when (viewModel.isAscending) {
-                    true -> {
-                        tvAscendingDescending.text = getString(R.string.ascending)
-                        viewModel.isAscending = false
-                    }
-                    else -> {
-                        tvAscendingDescending.text = getString(R.string.descending)
-                        viewModel.isAscending = true
-                    }
-                }
+                viewModel.updateState { it.copy(isAscending = !viewModel.currentState.isAscending) }
             }
 
             etSearch.setOnEditorActionListener { input, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    viewModel.search(input.text.toString())
+                    viewModel.updateState { it.copy(searchQuery = input.text.toString()) }
                     dismiss()
                     return@setOnEditorActionListener true
                 }
@@ -88,15 +82,11 @@ class FilterDialog : BottomSheetDialogFragment() {
             }
 
             tvByName.setOnClickListener {
-                tvByName.setTextColor(Color.RED)
-                tvByPeriodicity.setTextColor(Color.BLACK)
-                viewModel.sortParam = 0
+                viewModel.updateState { it.copy(typeOfSort = 0) }
             }
 
             tvByPeriodicity.setOnClickListener {
-                tvByName.setTextColor(Color.BLACK)
-                tvByPeriodicity.setTextColor(Color.RED)
-                viewModel.sortParam = 1
+                viewModel.updateState { it.copy(typeOfSort = 1) }
             }
         }
     }

@@ -37,14 +37,14 @@ class HabitsFragment : Fragment(R.layout.fragment_habits) {
             }
         }
 
-        viewModel.habitsList.observe(viewLifecycleOwner) {
+        viewModel.observeList(viewLifecycleOwner, habitType) {
             habitsAdapter.submitList(it)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        viewModel.setType(habitType)
+        viewModel.updateState { it.copy(type = habitType) }
     }
 
     companion object {

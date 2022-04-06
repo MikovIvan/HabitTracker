@@ -12,6 +12,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -20,6 +21,7 @@ import ru.mikov.habittracker.R
 import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitBinding
+import ru.mikov.habittracker.ui.habits.HabitsViewModel
 
 
 class HabitFragment : Fragment(R.layout.fragment_habit) {
@@ -27,6 +29,7 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
     private val args: HabitFragmentArgs by navArgs()
     private val viewBinding: FragmentHabitBinding by viewBinding()
     private val viewModel: HabitViewModel by viewModels()
+    private val viewModel2: HabitsViewModel by activityViewModels()
     private var habit: Habit? = null
     private var pickedColor = -1
     private var habitType: HabitType = HabitType.GOOD
@@ -45,6 +48,7 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
     private fun initViews() {
         with(viewBinding) {
             if (habit != null) {
+                habitType = habit!!.type
                 etHabitName.setText(habit!!.name)
                 etHabitDescription.setText(habit!!.description)
                 etHabitPeriodicity.setText(habit!!.periodicity)
@@ -70,9 +74,8 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
             btnSave.setOnClickListener {
                 if (isValidate()) {
                     if (habit != null) updateHabit() else saveHabit()
-                    val action =
-                        HabitFragmentDirections.actionNavHabitToViewPagerFragment(habitType)
-                    findNavController().navigate(action)
+                    findNavController().navigateUp()
+                    viewModel2.updateState { it.copy(numberOfTab = habitType.numOfTab) }
                 }
             }
 

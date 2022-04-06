@@ -5,7 +5,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
+import androidx.viewpager2.widget.ViewPager2
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import ru.mikov.habittracker.R
@@ -18,7 +18,6 @@ import ru.mikov.habittracker.ui.habits.HabitsViewModel
 class ViewPagerFragment : Fragment(R.layout.fragment_view_pager) {
 
     private val viewBinding: FragmentViewPagerBinding by viewBinding()
-    private val args: ViewPagerFragmentArgs by navArgs()
     private val viewModel: HabitsViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -41,14 +40,7 @@ class ViewPagerFragment : Fragment(R.layout.fragment_view_pager) {
             cvSort.setOnClickListener { findNavController().navigate(R.id.dialog_filter) }
 
             btnAsDes.setOnClickListener {
-                if (viewModel.state.value!!.sortBy) {
-                    viewModel.isAscending = false
-                    viewModel.setOrder(viewModel.isAscending)
-                } else {
-                    viewModel.isAscending = true
-                    viewModel.setOrder(viewModel.isAscending)
-                }
-
+                viewModel.updateState { it.copy(isAscending = !viewModel.currentState.isAscending) }
             }
 
             viewModel.state.observe(viewLifecycleOwner) {
@@ -62,7 +54,7 @@ class ViewPagerFragment : Fragment(R.layout.fragment_view_pager) {
                     else -> tvNameOfSort.text = getString(R.string.by_periodicity)
                 }
 
-                when (it.sortBy) {
+                when (it.isAscending) {
                     true -> {
                         btnAsDes.apply {
                             text = getString(R.string.ascending)
@@ -90,13 +82,12 @@ class ViewPagerFragment : Fragment(R.layout.fragment_view_pager) {
                 tvNameOfSort.visibility = if (it.typeOfSort != -1) View.VISIBLE else View.GONE
                 btnAsDes.visibility = if (it.typeOfSort != -1) View.VISIBLE else View.GONE
 
-                tvSearchFor.visibility =
-                    if (!it.searchQuery.isNullOrBlank()) View.VISIBLE else View.GONE
                 tvSearchFor.apply {
+                    visibility = if (!it.searchQuery.isNullOrBlank()) View.VISIBLE else View.GONE
                     text = getString(R.string.search_for, it.searchQuery)
                 }
 
-
+                viewPager.setCurrentItem(it.numberOfTab, false)
             }
 
             viewPager.adapter = adapter
@@ -107,10 +98,12 @@ class ViewPagerFragment : Fragment(R.layout.fragment_view_pager) {
                 }
             }.attach()
 
-            //when you go back from HabitFragment necessary tab should be chosen
-            viewPager.postDelayed({
-                viewPager.setCurrentItem(args.type.numOfTab, true)
-            }, 100)
+            viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    viewModel.updateState { it.copy(numberOfTab = position) }
+                }
+            })
         }
     }
 }
