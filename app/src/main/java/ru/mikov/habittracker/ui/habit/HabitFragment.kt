@@ -21,6 +21,7 @@ import ru.mikov.habittracker.R
 import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitBinding
+import ru.mikov.habittracker.ui.extentions.hideKeyboard
 import ru.mikov.habittracker.ui.habits.HabitsViewModel
 
 
@@ -76,6 +77,7 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
                     if (habit != null) updateHabit() else saveHabit()
                     findNavController().navigateUp()
                     viewModel2.updateState { it.copy(numberOfTab = habitType.numOfTab) }
+                    hideKeyboard()
                 }
             }
 

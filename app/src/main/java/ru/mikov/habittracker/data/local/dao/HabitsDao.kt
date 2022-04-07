@@ -26,5 +26,5 @@ interface HabitsDao : BaseDao<Habit> {
     fun findHabitById(id: Int): Habit
 
     @RawQuery(observedEntities = [Habit::class])
-    fun findArticlesByRaw(simpleSQLiteQuery: SimpleSQLiteQuery): LiveData<List<Habit>>
+    fun findHabitsByRaw(simpleSQLiteQuery: SimpleSQLiteQuery): LiveData<List<Habit>>
 }

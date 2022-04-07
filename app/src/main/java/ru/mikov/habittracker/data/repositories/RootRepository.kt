@@ -23,7 +23,7 @@ object RootRepository {
     }
 
     fun rawQueryHabits(filter: HabitFilter): LiveData<List<Habit>> {
-        return habitsDao.findArticlesByRaw(SimpleSQLiteQuery(filter.toQuery()))
+        return habitsDao.findHabitsByRaw(SimpleSQLiteQuery(filter.toQuery()))
     }
 
 }
