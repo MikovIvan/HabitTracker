@@ -13,6 +13,7 @@ import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitsBinding
 import ru.mikov.habittracker.ui.ViewPagerFragmentDirections
 import ru.mikov.habittracker.ui.adapters.HabitAdapter
+import ru.mikov.habittracker.ui.extentions.registerAdapterDataObserver
 
 
 class HabitsFragment : Fragment(R.layout.fragment_habits) {
@@ -25,26 +26,34 @@ class HabitsFragment : Fragment(R.layout.fragment_habits) {
         findNavController().navigate(action)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        habitType = arguments?.get(ARGS_TYPE) as HabitType
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        habitType = arguments?.get(ARGS_TYPE) as HabitType
+        initViews()
+        initViewModel()
+    }
 
-        with(viewBinding) {
-            rvHabits.apply {
-                layoutManager = LinearLayoutManager(context)
-                adapter = habitsAdapter
-            }
-        }
-
-        viewModel.observeList(viewLifecycleOwner, habitType) {
+    private fun initViewModel() {
+        viewModel.getHabits(habitType).observe(viewLifecycleOwner) {
             habitsAdapter.submitList(it)
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.updateState { it.copy(type = habitType) }
+    private fun initViews() {
+        with(viewBinding) {
+            rvHabits.apply {
+                layoutManager = LinearLayoutManager(context)
+                adapter = habitsAdapter
+
+                //need to go to the start of the list after sort/add/delete item
+                habitsAdapter.registerAdapterDataObserver(this)
+            }
+        }
     }
 
     companion object {

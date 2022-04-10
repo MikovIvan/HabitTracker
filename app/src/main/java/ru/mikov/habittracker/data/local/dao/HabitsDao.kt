@@ -3,9 +3,8 @@ package ru.mikov.habittracker.data.local.dao
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.RawQuery
-import androidx.sqlite.db.SimpleSQLiteQuery
 import ru.mikov.habittracker.data.local.entities.Habit
+import ru.mikov.habittracker.data.local.entities.HabitType
 
 @Dao
 interface HabitsDao : BaseDao<Habit> {
@@ -13,9 +12,10 @@ interface HabitsDao : BaseDao<Habit> {
     @Query(
         """
         SELECT * FROM habits
+        WHERE type = :type
     """
     )
-    fun findHabits(): LiveData<List<Habit>>
+    fun findHabits(type: HabitType): LiveData<List<Habit>>
 
     @Query(
         """
@@ -25,6 +25,4 @@ interface HabitsDao : BaseDao<Habit> {
     )
     fun findHabitById(id: Int): Habit
 
-    @RawQuery(observedEntities = [Habit::class])
-    fun findHabitsByRaw(simpleSQLiteQuery: SimpleSQLiteQuery): LiveData<List<Habit>>
 }
