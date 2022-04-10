@@ -12,6 +12,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ru.mikov.habittracker.R
 import ru.mikov.habittracker.databinding.BottomSheetBinding
 import ru.mikov.habittracker.ui.habits.HabitsViewModel
+import ru.mikov.habittracker.ui.habits.Sort
+
 
 class FilterDialog : BottomSheetDialogFragment() {
 
@@ -29,28 +31,12 @@ class FilterDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        observeState()
+        initViews()
+    }
+
+    private fun initViews() {
         with(viewBinding) {
-            viewModel.state.observe(viewLifecycleOwner) {
-                etSearch.setText(it.searchQuery)
-
-                when (it.typeOfSort) {
-                    0 -> {
-                        tvByName.setTextColor(Color.RED)
-                        tvByPeriodicity.setTextColor(Color.BLACK)
-                    }
-                    1 -> {
-                        tvByName.setTextColor(Color.BLACK)
-                        tvByPeriodicity.setTextColor(Color.RED)
-                    }
-                    else -> {
-                        tvByName.setTextColor(Color.BLACK)
-                        tvByPeriodicity.setTextColor(Color.BLACK)
-                    }
-                }
-
-                if (it.isAscending) tvAscendingDescending.text = getString(R.string.ascending) else
-                    tvAscendingDescending.text = getString(R.string.descending)
-            }
 
             btnApply.setOnClickListener {
                 viewModel.updateState { it.copy(searchQuery = etSearch.text.toString()) }
@@ -61,7 +47,7 @@ class FilterDialog : BottomSheetDialogFragment() {
                 viewModel.updateState {
                     it.copy(
                         searchQuery = "",
-                        typeOfSort = -1,
+                        sort = Sort.NONE,
                         isAscending = false
                     )
                 }
@@ -82,11 +68,37 @@ class FilterDialog : BottomSheetDialogFragment() {
             }
 
             tvByName.setOnClickListener {
-                viewModel.updateState { it.copy(typeOfSort = 0) }
+                viewModel.updateState { it.copy(sort = Sort.NAME) }
             }
 
             tvByPeriodicity.setOnClickListener {
-                viewModel.updateState { it.copy(typeOfSort = 1) }
+                viewModel.updateState { it.copy(sort = Sort.PERIODICITY) }
+            }
+        }
+    }
+
+    private fun observeState() {
+        with(viewBinding) {
+            viewModel.observeState(viewLifecycleOwner) {
+                etSearch.setText(it.searchQuery)
+
+                when (it.sort) {
+                    Sort.NONE -> {
+                        tvByName.setTextColor(Color.BLACK)
+                        tvByPeriodicity.setTextColor(Color.BLACK)
+                    }
+                    Sort.NAME -> {
+                        tvByName.setTextColor(Color.RED)
+                        tvByPeriodicity.setTextColor(Color.BLACK)
+                    }
+                    Sort.PERIODICITY -> {
+                        tvByName.setTextColor(Color.BLACK)
+                        tvByPeriodicity.setTextColor(Color.RED)
+                    }
+                }
+
+                if (it.isAscending) tvAscendingDescending.text = getString(R.string.ascending) else
+                    tvAscendingDescending.text = getString(R.string.descending)
             }
         }
     }

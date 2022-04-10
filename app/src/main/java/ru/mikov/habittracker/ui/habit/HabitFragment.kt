@@ -10,9 +10,10 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.os.bundleOf
 import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -22,25 +23,32 @@ import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitBinding
 import ru.mikov.habittracker.ui.extentions.hideKeyboard
-import ru.mikov.habittracker.ui.habits.HabitsViewModel
 
 
 class HabitFragment : Fragment(R.layout.fragment_habit) {
 
+    companion object {
+        const val NUMBER_OF_TAB_KEY = "NUMBER_OF_TAB_KEY"
+        const val NUMBER_OF_TAB = "NUMBER_OF_TAB"
+    }
+
     private val args: HabitFragmentArgs by navArgs()
     private val viewBinding: FragmentHabitBinding by viewBinding()
     private val viewModel: HabitViewModel by viewModels()
-    private val viewModel2: HabitsViewModel by activityViewModels()
     private var habit: Habit? = null
     private var pickedColor = -1
     private var habitType: HabitType = HabitType.GOOD
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         if (args.habitId != -1) {
             habit = viewModel.getHabit(args.habitId)
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         initSpinner(habit)
         addColorPicker(viewBinding.llt)
         initViews()
@@ -76,8 +84,11 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
                 if (isValidate()) {
                     if (habit != null) updateHabit() else saveHabit()
                     findNavController().navigateUp()
-                    viewModel2.updateState { it.copy(numberOfTab = habitType.numOfTab) }
                     hideKeyboard()
+                    setFragmentResult(
+                        NUMBER_OF_TAB_KEY,
+                        bundleOf(NUMBER_OF_TAB to habitType.numOfTab)
+                    )
                 }
             }
 
@@ -197,7 +208,7 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
     }
 
     private fun isValidate(): Boolean =
-        validateName() && validateDiscription() && validatePeriodicity() && validateNumberOfExecutions()
+        validateName() && validateDescription() && validatePeriodicity() && validateNumberOfExecutions()
 
     private fun validateName(): Boolean {
         with(viewBinding) {
@@ -212,7 +223,7 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
         }
     }
 
-    private fun validateDiscription(): Boolean {
+    private fun validateDescription(): Boolean {
         with(viewBinding) {
             if (etHabitDescription.text.toString().trim().isEmpty()) {
                 tilHabitDescription.error = "Enter description!"
