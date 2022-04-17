@@ -14,7 +14,7 @@ object DbManager {
         App.applicationContext(),
         AppDb::class.java,
         AppDb.DATABASE_NAME
-    ).allowMainThreadQueries().build()
+    ).build()
 }
 
 @Database(

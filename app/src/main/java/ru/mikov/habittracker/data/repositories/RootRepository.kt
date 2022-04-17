@@ -8,7 +8,7 @@ import ru.mikov.habittracker.data.local.entities.HabitType
 object RootRepository {
     private var habitsDao = db.habitsDao()
 
-    fun addHabit(habit: Habit) {
+    suspend fun addHabit(habit: Habit) {
         habitsDao.insert(habit)
     }
 
@@ -20,7 +20,7 @@ object RootRepository {
         return habitsDao.findHabits(type)
     }
 
-    fun update(updatedHabit: Habit) {
+    suspend fun update(updatedHabit: Habit) {
         habitsDao.update(updatedHabit)
     }
 }

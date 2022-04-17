@@ -1,6 +1,8 @@
 package ru.mikov.habittracker.ui.habit
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.repositories.RootRepository
 
@@ -8,11 +10,11 @@ class HabitViewModel : ViewModel() {
     private val repository = RootRepository
 
     fun addHabit(habit: Habit) {
-        repository.addHabit(habit)
+        viewModelScope.launch { repository.addHabit(habit) }
     }
 
     fun update(habit: Habit) {
-        repository.update(habit)
+        viewModelScope.launch { repository.update(habit) }
     }
 
     fun getHabit(id: Int): Habit {

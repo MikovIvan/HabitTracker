@@ -10,13 +10,13 @@ interface BaseDao<T : Any> {
     fun insert(list: List<T>): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(obj: T): Long
+    suspend fun insert(obj: T): Long
 
     @Update
     fun update(list: List<T>)
 
     @Update
-    fun update(obj: T)
+    suspend fun update(obj: T)
 
     @Delete
     fun delete(obj: T)
