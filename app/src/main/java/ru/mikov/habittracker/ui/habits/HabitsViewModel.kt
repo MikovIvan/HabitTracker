@@ -54,6 +54,31 @@ class HabitsViewModel(handle: SavedStateHandle) :
         return list
     }
 
+    fun handleSearch(searchQuery: String) {
+        updateState { it.copy(searchQuery = searchQuery) }
+    }
+
+    fun clearFilter() {
+        updateState {
+            it.copy(
+                searchQuery = "",
+                sort = Sort.NONE,
+                isAscending = false
+            )
+        }
+    }
+
+    fun chooseFilterMode() {
+        updateState { it.copy(isAscending = !currentState.isAscending) }
+    }
+
+    fun chooseSortMode(sort: Sort) {
+        updateState { it.copy(sort = sort) }
+    }
+
+    fun chooseTabNumber(number: Int) {
+        updateState { it.copy(numberOfTab = number) }
+    }
 }
 
 data class HabitsState(

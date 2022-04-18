@@ -31,7 +31,7 @@ class ViewPagerFragment : Fragment(R.layout.fragment_view_pager) {
 
         setFragmentResultListener(NUMBER_OF_TAB_KEY) { _, bundle ->
             val result = bundle.getInt(NUMBER_OF_TAB)
-            viewModel.updateState { it.copy(numberOfTab = result) }
+            viewModel.chooseTabNumber(result)
         }
     }
 
@@ -61,7 +61,7 @@ class ViewPagerFragment : Fragment(R.layout.fragment_view_pager) {
             viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
-                    viewModel.updateState { it.copy(numberOfTab = position) }
+                    viewModel.chooseTabNumber(position)
                 }
             })
         }
@@ -80,7 +80,7 @@ class ViewPagerFragment : Fragment(R.layout.fragment_view_pager) {
             cvSort.setOnClickListener { findNavController().navigate(R.id.dialog_filter) }
 
             btnAsDes.setOnClickListener {
-                viewModel.updateState { it.copy(isAscending = !viewModel.currentState.isAscending) }
+                viewModel.chooseFilterMode()
             }
         }
     }

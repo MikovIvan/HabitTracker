@@ -39,28 +39,22 @@ class FilterDialog : BottomSheetDialogFragment() {
         with(viewBinding) {
 
             btnApply.setOnClickListener {
-                viewModel.updateState { it.copy(searchQuery = etSearch.text.toString()) }
+                viewModel.handleSearch(etSearch.text.toString())
                 dismiss()
             }
 
             btnCancel.setOnClickListener {
-                viewModel.updateState {
-                    it.copy(
-                        searchQuery = "",
-                        sort = Sort.NONE,
-                        isAscending = false
-                    )
-                }
+                viewModel.clearFilter()
                 dismiss()
             }
 
             tvAscendingDescending.setOnClickListener {
-                viewModel.updateState { it.copy(isAscending = !viewModel.currentState.isAscending) }
+                viewModel.chooseFilterMode()
             }
 
             etSearch.setOnEditorActionListener { input, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    viewModel.updateState { it.copy(searchQuery = input.text.toString()) }
+                    viewModel.handleSearch(input.text.toString())
                     dismiss()
                     return@setOnEditorActionListener true
                 }
@@ -68,11 +62,11 @@ class FilterDialog : BottomSheetDialogFragment() {
             }
 
             tvByName.setOnClickListener {
-                viewModel.updateState { it.copy(sort = Sort.NAME) }
+                viewModel.chooseSortMode(Sort.NAME)
             }
 
             tvByPeriodicity.setOnClickListener {
-                viewModel.updateState { it.copy(sort = Sort.PERIODICITY) }
+                viewModel.chooseSortMode(Sort.PERIODICITY)
             }
         }
     }
