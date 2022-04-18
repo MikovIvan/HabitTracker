@@ -6,6 +6,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.Transformations
 import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.local.entities.HabitType
+import ru.mikov.habittracker.data.remote.NetworkManager
+import ru.mikov.habittracker.data.remote.res.HabitRes
 import ru.mikov.habittracker.data.repositories.RootRepository
 import ru.mikov.habittracker.ui.base.BaseViewModel
 import ru.mikov.habittracker.ui.base.IViewModelState
@@ -13,6 +15,7 @@ import ru.mikov.habittracker.ui.base.IViewModelState
 class HabitsViewModel(handle: SavedStateHandle) :
     BaseViewModel<HabitsState>(handle, HabitsState()) {
     private val repository = RootRepository
+    private val network = NetworkManager.api
 
     init {
         subscribeOnDataSource(repository.getHabitsByType(HabitType.GOOD)) { habits, state ->
@@ -54,6 +57,9 @@ class HabitsViewModel(handle: SavedStateHandle) :
         return list
     }
 
+    suspend fun getHabitsFromNetwork(): List<HabitRes> {
+        return network.habits()
+    }
 }
 
 data class HabitsState(
