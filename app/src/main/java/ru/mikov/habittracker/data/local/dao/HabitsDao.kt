@@ -23,6 +23,6 @@ interface HabitsDao : BaseDao<Habit> {
         WHERE id = :id
     """
     )
-    fun findHabitById(id: Int): Habit
+    fun findHabitById(id: Int): LiveData<Habit?>
 
 }

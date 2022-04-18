@@ -20,9 +20,12 @@ import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import ru.mikov.habittracker.R
 import ru.mikov.habittracker.data.local.entities.Habit
+import ru.mikov.habittracker.data.local.entities.HabitPriority
 import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitBinding
+import ru.mikov.habittracker.ui.base.ViewModelFactory
 import ru.mikov.habittracker.ui.extentions.hideKeyboard
+import ru.mikov.habittracker.ui.extentions.onItemSelectedListener
 
 
 class HabitFragment : Fragment(R.layout.fragment_habit) {
@@ -34,98 +37,110 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
 
     private val args: HabitFragmentArgs by navArgs()
     private val viewBinding: FragmentHabitBinding by viewBinding()
-    private val viewModel: HabitViewModel by viewModels()
-    private var habit: Habit? = null
-    private var pickedColor = -1
-    private var habitType: HabitType = HabitType.GOOD
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (args.habitId != -1) {
-            habit = viewModel.getHabit(args.habitId)
-        }
+    private val viewModel: HabitViewModel by viewModels {
+        ViewModelFactory(
+            owner = this,
+            params = args.habitId
+        )
     }
+
+    private lateinit var adapter: ArrayAdapter<HabitPriority>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initSpinner(habit)
+        initSpinner()
         addColorPicker(viewBinding.llt)
         initViews()
     }
 
     private fun initViews() {
         with(viewBinding) {
-            if (habit != null) {
-                habitType = habit!!.type
-                etHabitName.setText(habit!!.name)
-                etHabitDescription.setText(habit!!.description)
-                etHabitPeriodicity.setText(habit!!.periodicity)
-                etNumberOfExecutions.setText(habit!!.numberOfExecutions)
-                when (habit!!.type) {
-                    HabitType.BAD -> rgHabitType.check(R.id.rb_bad)
-                    HabitType.GOOD -> rgHabitType.check(R.id.rb_good)
-                }
-                btnSave.text = getString(R.string.btn_update_text)
-                ivSelectedColor.setColorFilter(habit!!.color)
-                pickedColor = habit!!.color
-                val a = FloatArray(3)
-                Color.colorToHSV(pickedColor, a)
-                tvHsv.text = resources.getString(R.string.hsv_formatted, a[0], a[1], a[2])
-                tvRgb.text = resources.getString(
-                    R.string.rgb_formatted,
-                    Color.red(pickedColor), Color.green(pickedColor), Color.blue(pickedColor)
-                )
-            } else {
-                btnSave.text = getString(R.string.btn_save_text)
-            }
+            viewModel.observeState(viewLifecycleOwner) { state ->
+                if (!state.isAddingMode) {
+                    etHabitName.setText(state.name)
+                    etHabitDescription.setText(state.description)
+                    etHabitPeriodicity.setText(state.periodicity)
+                    etNumberOfExecutions.setText(state.numberOfExecutions)
+                    when (state.type) {
+                        HabitType.BAD -> rgHabitType.check(R.id.rb_bad)
+                        HabitType.GOOD -> rgHabitType.check(R.id.rb_good)
+                    }
+                    btnSave.text = getString(R.string.btn_update_text)
+                    ivSelectedColor.setColorFilter(state.pickedColor)
+                    val a = FloatArray(3)
+                    Color.colorToHSV(state.pickedColor, a)
+                    tvHsv.text = resources.getString(R.string.hsv_formatted, a[0], a[1], a[2])
+                    tvRgb.text = resources.getString(
+                        R.string.rgb_formatted,
+                        Color.red(state.pickedColor),
+                        Color.green(state.pickedColor),
+                        Color.blue(state.pickedColor)
+                    )
 
-            btnSave.setOnClickListener {
-                if (isValidate()) {
-                    if (habit != null) updateHabit() else saveHabit()
-                    findNavController().navigateUp()
-                    hideKeyboard()
-                    setFragmentResult(
-                        NUMBER_OF_TAB_KEY,
-                        bundleOf(NUMBER_OF_TAB to habitType.numOfTab)
+                    val spinnerPosition = adapter.getPosition(state.priority)
+                    spinnerHabitPriority.setSelection(spinnerPosition)
+                } else {
+                    btnSave.text = getString(R.string.btn_save_text)
+                }
+
+                btnSave.setOnClickListener {
+                    if (isValidate()) {
+                        if (!state.isAddingMode) updateHabit() else saveHabit()
+                        findNavController().navigateUp()
+                        hideKeyboard()
+                        setFragmentResult(
+                            NUMBER_OF_TAB_KEY,
+                            bundleOf(NUMBER_OF_TAB to state.type.numOfTab)
+                        )
+                    }
+                }
+
+                rgHabitType.setOnCheckedChangeListener { radioGroup, checkedId ->
+                    when (checkedId) {
+                        R.id.rb_good -> viewModel.chooseType(HabitType.GOOD)
+                        R.id.rb_bad -> viewModel.chooseType(HabitType.BAD)
+                    }
+                }
+
+                spinnerHabitPriority.onItemSelectedListener { parent, position ->
+                    viewModel.choosePriority(
+                        HabitPriority.fromString(
+                            parent.getItemAtPosition(position).toString()
+                        )
                     )
                 }
-            }
 
-            rgHabitType.setOnCheckedChangeListener { radioGroup, checkedId ->
-                when (checkedId) {
-                    R.id.rb_good -> habitType = HabitType.GOOD
-                    R.id.rb_bad -> habitType = HabitType.BAD
-                }
             }
         }
     }
 
     private fun saveHabit() {
         with(viewBinding) {
-            habit = Habit(
+            val habit = Habit(
                 name = etHabitName.text.toString(),
                 description = etHabitDescription.text.toString(),
-                priority = spinnerHabitPriority.selectedItem.toString(),
-                type = habitType,
+                priority = viewModel.currentState.priority,
+                type = viewModel.currentState.type,
                 periodicity = etHabitPeriodicity.text.toString(),
                 numberOfExecutions = etNumberOfExecutions.text.toString(),
-                color = pickedColor
+                color = viewModel.currentState.pickedColor
             )
-            viewModel.addHabit(habit!!)
+            viewModel.addHabit(habit)
         }
     }
 
     private fun updateHabit() {
         with(viewBinding) {
-            val updatedHabit = habit!!.copy(
+            val updatedHabit = Habit(
+                id = args.habitId,
                 name = etHabitName.text.toString(),
                 description = etHabitDescription.text.toString(),
-                priority = spinnerHabitPriority.selectedItem.toString(),
-                type = habitType,
+                priority = viewModel.currentState.priority,
+                type = viewModel.currentState.type,
                 periodicity = etHabitPeriodicity.text.toString(),
                 numberOfExecutions = etNumberOfExecutions.text.toString(),
-                color = pickedColor
+                color = viewModel.currentState.pickedColor
             )
             viewModel.update(updatedHabit)
         }
@@ -182,29 +197,26 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
 
             imageView.setOnClickListener {
                 viewBinding.ivSelectedColor.colorFilter = imageView.colorFilter
-                pickedColor = color
+                viewModel.chooseColor(color)
                 Color.colorToHSV(color, a)
-                viewBinding.tvRgb.text = resources.getString(R.string.rgb_formatted, r, g, b)
-                viewBinding.tvHsv.text =
-                    resources.getString(R.string.hsv_formatted, a[0], a[1], a[2])
+                with(viewBinding) {
+                    tvRgb.text = resources.getString(R.string.rgb_formatted, r, g, b)
+                    tvHsv.text =
+                        resources.getString(R.string.hsv_formatted, a[0], a[1], a[2])
+                }
             }
 
             (root as LinearLayout).addView(imageView)
         }
     }
 
-    private fun initSpinner(habit: Habit?) {
-        val adapter: ArrayAdapter<CharSequence> = ArrayAdapter.createFromResource(
+    private fun initSpinner() {
+        adapter = ArrayAdapter(
             requireContext(),
-            R.array.priority,
-            android.R.layout.simple_spinner_item
+            android.R.layout.simple_spinner_dropdown_item,
+            HabitPriority.values()
         )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         viewBinding.spinnerHabitPriority.adapter = adapter
-        if (!habit?.priority.isNullOrBlank()) {
-            val spinnerPosition = adapter.getPosition(habit?.priority)
-            viewBinding.spinnerHabitPriority.setSelection(spinnerPosition)
-        }
     }
 
     private fun isValidate(): Boolean =

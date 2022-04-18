@@ -12,7 +12,7 @@ object RootRepository {
         habitsDao.insert(habit)
     }
 
-    fun getHabit(id: Int): Habit {
+    fun getHabit(id: Int): LiveData<Habit?> {
         return habitsDao.findHabitById(id)
     }
 

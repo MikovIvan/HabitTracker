@@ -24,3 +24,4 @@ local.properties
 /gradlew.bat
 /.idea/misc.xml
 /.idea/vcs.xml
+/apikey.properties

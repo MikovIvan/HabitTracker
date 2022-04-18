@@ -53,7 +53,7 @@ class HabitViewHolder(
             )
             tvHabitPriority.text = this@HabitViewHolder.itemView.context.getString(
                 R.string.tv_habit_priority,
-                habit.priority
+                habit.priority.toString()
             )
             tvHabitType.text = when (habit.type) {
                 HabitType.GOOD -> this@HabitViewHolder.itemView.context.getString(R.string.type_good)

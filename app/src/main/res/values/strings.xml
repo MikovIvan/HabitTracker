@@ -36,6 +36,9 @@
     <string name="by_periodicity">By periodicity</string>
     <string name="cancel">Сancel</string>
     <string name="search_for">Search for: %1$s</string>
+    <string name="high">High</string>
+    <string name="medium">Medium</string>
+    <string name="low">Low</string>
 
 
     <string-array name="priority">
