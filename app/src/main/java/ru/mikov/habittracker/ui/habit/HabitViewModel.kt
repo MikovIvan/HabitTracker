@@ -12,9 +12,10 @@ import ru.mikov.habittracker.ui.base.IViewModelState
 
 class HabitViewModel(
     handle: SavedStateHandle,
-    habitId: Int
 ) : BaseViewModel<HabitState>(handle, HabitState()) {
     private val repository = RootRepository
+    private val args: HabitFragmentArgs = HabitFragmentArgs.fromSavedStateHandle(handle)
+    private val habitId = args.habitId
 
     init {
         subscribeOnDataSource(repository.getHabit(habitId)) { habit, state ->

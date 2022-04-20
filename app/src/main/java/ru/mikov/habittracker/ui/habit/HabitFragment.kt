@@ -23,7 +23,7 @@ import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.local.entities.HabitPriority
 import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitBinding
-import ru.mikov.habittracker.ui.base.ViewModelFactory
+
 import ru.mikov.habittracker.ui.extentions.hideKeyboard
 import ru.mikov.habittracker.ui.extentions.onItemSelectedListener
 
@@ -37,24 +37,19 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
 
     private val args: HabitFragmentArgs by navArgs()
     private val viewBinding: FragmentHabitBinding by viewBinding()
-    private val viewModel: HabitViewModel by viewModels {
-        ViewModelFactory(
-            owner = this,
-            params = args.habitId
-        )
-    }
+    private val viewModel: HabitViewModel by viewModels()
 
     private lateinit var adapter: ArrayAdapter<HabitPriority>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initSpinner()
-        addColorPicker(viewBinding.llt)
         initViews()
     }
 
     private fun initViews() {
+        initSpinner()
+        addColorPicker(viewBinding.llt)
         with(viewBinding) {
             viewModel.observeState(viewLifecycleOwner) { state ->
                 if (!state.isAddingMode) {
@@ -110,7 +105,6 @@ class HabitFragment : Fragment(R.layout.fragment_habit) {
                         )
                     )
                 }
-
             }
         }
     }
