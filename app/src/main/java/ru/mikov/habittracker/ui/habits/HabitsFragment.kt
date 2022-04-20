@@ -1,9 +1,6 @@
 package ru.mikov.habittracker.ui.habits
 
-import android.os.Bundle
-import android.view.View
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,38 +10,25 @@ import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.FragmentHabitsBinding
 import ru.mikov.habittracker.ui.ViewPagerFragmentDirections
 import ru.mikov.habittracker.ui.adapters.HabitAdapter
+import ru.mikov.habittracker.ui.base.BaseFragment
 import ru.mikov.habittracker.ui.extentions.registerAdapterDataObserver
 
 
-class HabitsFragment : Fragment(R.layout.fragment_habits) {
+class HabitsFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fragment_habits) {
 
     private val viewBinding: FragmentHabitsBinding by viewBinding()
-    private val viewModel: HabitsViewModel by activityViewModels()
+    override val viewModel: HabitsViewModel by activityViewModels()
     private lateinit var habitType: HabitType
-    private val habitsAdapter: HabitAdapter = HabitAdapter {
+    private var habitsAdapter: HabitAdapter = HabitAdapter {
         val action = ViewPagerFragmentDirections.actionNavViewPagerToNavHabit(it.id)
         findNavController().navigate(action)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun init() {
         habitType = arguments?.get(ARGS_TYPE) as HabitType
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        initViews()
-        initViewModel()
-    }
-
-    private fun initViewModel() {
-        viewModel.getHabits(habitType).observe(viewLifecycleOwner) {
-            habitsAdapter.submitList(it)
-        }
-    }
-
-    private fun initViews() {
+    override fun setupViews() {
         with(viewBinding) {
             rvHabits.apply {
                 layoutManager = LinearLayoutManager(context)
@@ -55,6 +39,13 @@ class HabitsFragment : Fragment(R.layout.fragment_habits) {
             }
         }
     }
+
+    override fun observeViewModelData() {
+        viewModel.getHabits(habitType).observe(viewLifecycleOwner) {
+            habitsAdapter.submitList(it)
+        }
+    }
+
 
     companion object {
         private const val ARGS_NAME = "args_name"
@@ -68,6 +59,10 @@ class HabitsFragment : Fragment(R.layout.fragment_habits) {
                 )
             }
         }
+    }
+
+    override fun renderUi(data: HabitsState) {
+
     }
 
 }
