@@ -23,8 +23,7 @@ object DbManager {
     exportSchema = false,
     views = []
 )
-
-@TypeConverters(HabitTypeConverter::class)
+@TypeConverters(HabitTypeConverter::class, HabitPriorityConverter::class)
 abstract class AppDb : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = BuildConfig.APPLICATION_ID + ".db"

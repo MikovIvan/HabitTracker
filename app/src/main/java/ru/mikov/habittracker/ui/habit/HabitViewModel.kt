@@ -57,10 +57,10 @@ class HabitViewModel(
 }
 
 data class HabitState(
-    val name: String = "",
-    val description: String = "",
-    val periodicity: String = "",
-    val numberOfExecutions: String = "",
+    var name: String = "",
+    var description: String = "",
+    var periodicity: String = "",
+    var numberOfExecutions: String = "",
     val isAddingMode: Boolean = true,
     val type: HabitType = HabitType.GOOD,
     val priority: HabitPriority = HabitPriority.HIGH,

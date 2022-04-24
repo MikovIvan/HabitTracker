@@ -62,9 +62,11 @@ class ViewPagerFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fr
                 text = getString(R.string.search_for, data.searchQuery)
             }
 
+
 //                viewPager.doOnPreDraw { viewPager.setCurrentItem(state.numberOfTab, false)}
             viewPager.setCurrentItem(data.numberOfTab, false)
         }
+        //отдельную ливдату на таб
     }
 
     override fun setupViews() {

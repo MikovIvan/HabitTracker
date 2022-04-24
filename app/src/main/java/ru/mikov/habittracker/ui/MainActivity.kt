@@ -37,4 +37,5 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
+    // логика взаимодействия с сервером??
 }

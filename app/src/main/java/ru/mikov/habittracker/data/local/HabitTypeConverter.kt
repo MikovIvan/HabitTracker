@@ -1,6 +1,7 @@
 package ru.mikov.habittracker.data.local
 
 import androidx.room.TypeConverter
+import ru.mikov.habittracker.data.local.entities.HabitPriority
 import ru.mikov.habittracker.data.local.entities.HabitType
 
 class HabitTypeConverter {
@@ -9,4 +10,12 @@ class HabitTypeConverter {
 
     @TypeConverter
     fun fromTypeHabit(value: HabitType) = value.name
+}
+
+class HabitPriorityConverter {
+    @TypeConverter
+    fun toPriorityHabit(value: String) = enumValueOf<HabitPriority>(value)
+
+    @TypeConverter
+    fun fromPriorityHabit(value: HabitPriority) = value.name
 }

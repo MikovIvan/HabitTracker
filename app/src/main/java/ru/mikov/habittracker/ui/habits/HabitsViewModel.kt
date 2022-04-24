@@ -25,6 +25,7 @@ class HabitsViewModel(handle: SavedStateHandle) :
     }
 
     fun getHabits(currentType: HabitType): LiveData<List<Habit>> {
+        //ливдата и трансформайшен
         val list = Transformations.switchMap(state) { state ->
             val currentHabits =
                 if (currentType == HabitType.GOOD) state.goodHabits else state.badHabits
@@ -42,7 +43,7 @@ class HabitsViewModel(handle: SavedStateHandle) :
                 }
             }
             if (!state.searchQuery.isNullOrBlank() && state.sort == Sort.NONE) {
-                habits = currentHabits.filter { it.name.startsWith(state.searchQuery, true) }
+                habits = currentHabits.filter { it.name.startsWith(state.searchQuery!!, true) }
             } else if (!state.searchQuery.isNullOrBlank() && state.sort == Sort.NAME) {
                 habits = habits.filter { it.name.startsWith(state.searchQuery.toString(), true) }
             } else if (!state.searchQuery.isNullOrBlank() && state.sort == Sort.PERIODICITY) {
@@ -82,7 +83,7 @@ class HabitsViewModel(handle: SavedStateHandle) :
 }
 
 data class HabitsState(
-    val searchQuery: String? = null,
+    var searchQuery: String? = null,
     val numberOfTab: Int = 0,
     val isAscending: Boolean = true,
     val sort: Sort = Sort.NONE,

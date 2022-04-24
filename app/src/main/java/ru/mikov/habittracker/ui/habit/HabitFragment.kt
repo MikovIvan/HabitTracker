@@ -73,6 +73,8 @@ class HabitFragment : BaseFragment<HabitState, HabitViewModel>(R.layout.fragment
         initSpinner()
         addColorPicker(viewBinding.llt)
         initViews()
+
+        viewBinding.viewmodel = viewModel
     }
 
     private fun saveHabit() {

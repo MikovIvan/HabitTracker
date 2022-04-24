@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+        <variable
+            name="viewmodel"
+            type="ru.mikov.habittracker.ui.habit.HabitViewModel" />
+
+    </data>
+
+    <ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <com.google.android.material.textfield.TextInputLayout
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_habit_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -27,6 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:hint="@string/name_of_habit"
+                android:text="@={viewmodel.state.name}"
                 android:imeOptions="actionNext"
                 android:inputType="textPersonName" />
 
@@ -46,6 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:hint="@string/description"
+                android:text="@={viewmodel.state.description}"
                 android:imeOptions="actionDone"
                 android:inputType="text" />
 
@@ -111,6 +122,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:hint="@string/enter_habit_periodicity"
+                android:text="@={viewmodel.state.periodicity}"
                 android:imeOptions="actionNext"
                 android:inputType="number" />
 
@@ -130,6 +142,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:hint="@string/enter_number_of_executions"
+                android:text="@={viewmodel.state.numberOfExecutions}"
                 android:imeOptions="actionDone"
                 android:inputType="number" />
 
@@ -195,5 +208,6 @@
             app:layout_constraintTop_toBottomOf="@id/iv_selected_color" />
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+</layout>
