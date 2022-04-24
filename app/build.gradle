@@ -5,6 +5,10 @@ plugins {
     id 'kotlin-kapt'
 }
 
+def apikeyPropertiesFile = rootProject.file("apikey.properties")
+def apikeyProperties = new Properties()
+apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+
 android {
     compileSdk 31
 
@@ -16,6 +20,9 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // should correspond to key/value pairs inside the file
+        buildConfigField("String", "API_KEY", apikeyProperties['API_KEY'])
     }
 
     buildTypes {
@@ -41,6 +48,10 @@ dependencies {
     def lifecycle_version = "2.2.0"
     def livedata_version = '2.5.0-alpha04'
     def nav_version = "2.4.2"
+    def roomVersion = "2.4.2"
+    def retrofit_version ="2.9.0"
+    def okhttp_version ="4.9.3"
+    def moshi_version ="1.9.3"
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
@@ -68,15 +79,19 @@ dependencies {
 
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
 
-    //preference
-    implementation 'androidx.preference:preference:1.1.1'
-
     //room
-    def roomVersion = "2.4.2"
     implementation("androidx.room:room-runtime:$roomVersion")
     // To use Kotlin annotation processing tool (kapt)
     kapt("androidx.room:room-compiler:$roomVersion")
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$roomVersion")
+
+    //network
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-moshi:$retrofit_version"
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
+    implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
 
 }
