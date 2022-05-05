@@ -15,7 +15,7 @@ interface RestService {
         @Body habitRes: HabitRes
     ): HabitUIDRes
 
-    @DELETE("habit")
+    @HTTP(method = "DELETE", path = "habit", hasBody = true)
     suspend fun deleteHabit(
         @Body habitUIDRes: HabitUIDRes
     )

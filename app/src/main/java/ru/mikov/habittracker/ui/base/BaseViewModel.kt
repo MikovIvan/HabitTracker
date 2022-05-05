@@ -1,11 +1,25 @@
 package ru.mikov.habittracker.ui.base
 
+import android.util.Log
 import androidx.lifecycle.*
+import kotlinx.coroutines.*
+import ru.mikov.habittracker.data.remote.err.ApiError
+import ru.mikov.habittracker.data.remote.err.NoNetworkError
+import java.net.SocketTimeoutException
 
 abstract class BaseViewModel<T : IViewModelState>(
     private val handleState: SavedStateHandle,
     initState: T
 ) : ViewModel() {
+
+    companion object {
+        private const val REQUEST_RETRY_DELAY = 10000L
+    }
+
+
+    private val notifications = MutableLiveData<Event<Notify>>()
+    private val loading = MutableLiveData(Loading.HIDE_LOADING)
+
     val state: MediatorLiveData<T> = MediatorLiveData<T>().apply {
         value = initState
     }
@@ -30,4 +44,106 @@ abstract class BaseViewModel<T : IViewModelState>(
     fun observeState(owner: LifecycleOwner, onChanged: (newState: T) -> Unit) {
         state.observe(owner, Observer { onChanged(it!!) })
     }
+
+    fun notify(content: Notify) {
+        notifications.value = Event(content)
+    }
+
+    private fun showLoading(loadingType: Loading = Loading.SHOW_LOADING) {
+        loading.value = loadingType
+    }
+
+    private fun hideLoading() {
+        loading.value = Loading.HIDE_LOADING
+    }
+
+    fun observeLoading(owner: LifecycleOwner, onChanged: (newState: Loading) -> Unit) {
+        loading.observe(owner, Observer { onChanged(it!!) })
+    }
+
+    fun observeNotifications(owner: LifecycleOwner, onNotify: (notification: Notify) -> Unit) {
+        notifications.observe(owner,
+            EventObserver { onNotify(it) })
+    }
+
+    protected fun launchSafety(
+        errHandler: ((Throwable) -> Unit)? = null,
+        completeHandler: ((Throwable?) -> Unit)? = null,
+        block: suspend CoroutineScope.() -> Unit
+    ) {
+        val errHand = CoroutineExceptionHandler { _, err ->
+            errHandler?.invoke(err) ?: when (err) {
+                is NoNetworkError -> {
+                    notify(Notify.ErrorMessage("Network not available, check internet connection"))
+                    Log.e("Error", "Network not available, check internet connection")
+                }
+
+                is SocketTimeoutException -> {
+                    notify(Notify.ErrorMessage("Network timeout exception - trying again"))
+                    Log.e("Error", "Network timeout exception - please try again")
+                }
+
+                is ApiError -> {
+                    notify(Notify.ErrorMessage(err.message))
+                    Log.e("Error", err.message)
+                }
+                else -> {
+                    notify(Notify.ErrorMessage(err.message ?: "Something wrong"))
+                    Log.e("Error", err.message ?: "Something wrong")
+                }
+            }
+        }
+
+        (viewModelScope + errHand).launch {
+            showLoading()
+            block()
+        }.invokeOnCompletion {
+            if (it != null) {
+                viewModelScope.launch {
+                    delay(REQUEST_RETRY_DELAY)
+                    launchSafety(errHandler, completeHandler, block)
+                }
+            } else {
+                hideLoading()
+                completeHandler?.invoke(it)
+            }
+        }
+    }
+}
+
+class Event<out E>(private val content: E) {
+    var hasBeenHandled = false
+
+    fun getContentIfNotHandled(): E? {
+        return if (hasBeenHandled) null
+        else {
+            hasBeenHandled = true
+            content
+        }
+    }
+}
+
+class EventObserver<E>(private val onEventUnhandledContent: (E) -> Unit) : Observer<Event<E>> {
+
+    override fun onChanged(event: Event<E>?) {
+        event?.getContentIfNotHandled()?.let {
+            onEventUnhandledContent(it)
+        }
+    }
+}
+
+sealed class Notify {
+    abstract val message: String
+
+    data class TextMessage(override val message: String) : Notify()
+
+    data class ErrorMessage(
+        override val message: String,
+        val errLabel: String? = null,
+        val errHandler: (() -> Unit)? = null
+    ) : Notify()
+}
+
+enum class Loading {
+    SHOW_LOADING, HIDE_LOADING
 }

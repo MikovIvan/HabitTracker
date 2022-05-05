@@ -11,27 +11,32 @@ import java.io.Serializable
 
 @Entity(tableName = "habits")
 data class Habit(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey
+    val id: String,
     var name: String,
     var description: String,
     var priority: HabitPriority,
     var type: HabitType,
     var periodicity: String,
+    var date: Long,
     val color: Int,
     @ColumnInfo(name = "number_of_executions")
     var numberOfExecutions: String
 ) : Serializable
 
-enum class HabitType(@StringRes val stringRes: Int, val numOfTab: Int) {
-    BAD(R.string.bad, 1),
-    GOOD(R.string.good, 0)
+enum class HabitType(@StringRes val stringRes: Int, val numOfTab: Int, val id: Int) {
+    BAD(R.string.bad, 1, 1),
+    GOOD(R.string.good, 0, 0);
+
+    companion object {
+        fun getById(id: Int) = values()[id]
+    }
 }
 
-enum class HabitPriority(@StringRes val stringRes: Int) {
-    HIGH(R.string.high),
-    MEDIUM(R.string.medium),
-    LOW(R.string.low);
+enum class HabitPriority(@StringRes val stringRes: Int, val id: Int) {
+    HIGH(R.string.high, 0),
+    MEDIUM(R.string.medium, 1),
+    LOW(R.string.low, 2);
 
     override fun toString(): String {
         return App.applicationContext().getString(stringRes)
@@ -39,8 +44,9 @@ enum class HabitPriority(@StringRes val stringRes: Int) {
 
     companion object {
         fun fromString(value: String) = values().first { it.toString() == value }
-    }
 
+        fun getById(id: Int) = values()[id]
+    }
 }
 
 

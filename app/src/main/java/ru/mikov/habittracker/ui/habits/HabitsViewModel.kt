@@ -6,18 +6,18 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.Transformations
 import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.local.entities.HabitType
-import ru.mikov.habittracker.data.remote.NetworkManager
-import ru.mikov.habittracker.data.remote.res.HabitRes
 import ru.mikov.habittracker.data.repositories.RootRepository
+import ru.mikov.habittracker.data.toHabit
 import ru.mikov.habittracker.ui.base.BaseViewModel
 import ru.mikov.habittracker.ui.base.IViewModelState
 
 class HabitsViewModel(handle: SavedStateHandle) :
     BaseViewModel<HabitsState>(handle, HabitsState()) {
     private val repository = RootRepository
-    private val network = NetworkManager.api
 
     init {
+        getHabitsFromNetwork()
+
         subscribeOnDataSource(repository.getHabitsByType(HabitType.GOOD)) { habits, state ->
             state.copy(goodHabits = habits)
         }
@@ -58,9 +58,13 @@ class HabitsViewModel(handle: SavedStateHandle) :
         return list
     }
 
-    suspend fun getHabitsFromNetwork(): List<HabitRes> {
-        return network.habits()
+    private fun getHabitsFromNetwork() {
+        launchSafety {
+            val habits = repository.loadHabitsFromNetwork().map { it.toHabit() }
+            repository.addHabitsToDb(habits)
+        }
     }
+
     fun handleSearch(searchQuery: String) {
         updateState { it.copy(searchQuery = searchQuery) }
     }
@@ -94,7 +98,7 @@ data class HabitsState(
     val isAscending: Boolean = true,
     val sort: Sort = Sort.NONE,
     val badHabits: List<Habit> = emptyList(),
-    val goodHabits: List<Habit> = emptyList(),
+    val goodHabits: List<Habit> = emptyList()
 ) : IViewModelState
 
 enum class Sort {

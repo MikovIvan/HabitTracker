@@ -2,6 +2,7 @@ package ru.mikov.habittracker
 
 import android.app.Application
 import android.content.Context
+import ru.mikov.habittracker.data.remote.NetworkMonitor
 
 class App : Application() {
 
@@ -15,6 +16,12 @@ class App : Application() {
 
     init {
         instance = this
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        NetworkMonitor.registerNetworkMonitor(applicationContext())
     }
 
 }

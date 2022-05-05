@@ -23,6 +23,13 @@ interface HabitsDao : BaseDao<Habit> {
         WHERE id = :id
     """
     )
-    fun findHabitById(id: Int): LiveData<Habit?>
+    fun findHabitById(id: String): LiveData<Habit?>
 
+    @Query(
+        """
+            DELETE FROM habits
+            WHERE id = :id
+        """
+    )
+    suspend fun deleteHabit(id: String)
 }

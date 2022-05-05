@@ -2,8 +2,7 @@ package ru.mikov.habittracker.ui.habit
 
 import android.content.res.Resources
 import android.graphics.Color
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -24,6 +23,7 @@ import ru.mikov.habittracker.databinding.FragmentHabitBinding
 import ru.mikov.habittracker.ui.base.BaseFragment
 import ru.mikov.habittracker.ui.extentions.hideKeyboard
 import ru.mikov.habittracker.ui.extentions.onItemSelectedListener
+import java.util.*
 
 
 class HabitFragment : BaseFragment<HabitState, HabitViewModel>(R.layout.fragment_habit) {
@@ -66,6 +66,8 @@ class HabitFragment : BaseFragment<HabitState, HabitViewModel>(R.layout.fragment
             } else {
                 btnSave.text = getString(R.string.btn_save_text)
             }
+            updateOptionsMenu()
+            if (data.isHabitLoaded || data.isHabitDeleted) findNavController().navigateUp()
         }
     }
 
@@ -77,16 +79,65 @@ class HabitFragment : BaseFragment<HabitState, HabitViewModel>(R.layout.fragment
         viewBinding.viewmodel = viewModel
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.habit_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_delete) {
+            viewModel.deleteHabit(args.habitId)
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        val item = menu.findItem(R.id.action_delete)
+        item.isVisible = !viewModel.currentState.isAddingMode
+    }
+
+    private fun initViews() {
+        with(viewBinding) {
+            btnSave.setOnClickListener {
+                if (isValidate()) {
+                    if (!viewModel.currentState.isAddingMode) updateHabit() else saveHabit()
+                    hideKeyboard()
+                    setFragmentResult(
+                        NUMBER_OF_TAB_KEY,
+                        bundleOf(NUMBER_OF_TAB to viewModel.currentState.type.numOfTab)
+                    )
+                }
+            }
+            rgHabitType.setOnCheckedChangeListener { radioGroup, checkedId ->
+                when (checkedId) {
+                    R.id.rb_good -> viewModel.chooseType(HabitType.GOOD)
+                    R.id.rb_bad -> viewModel.chooseType(HabitType.BAD)
+                }
+            }
+
+            spinnerHabitPriority.onItemSelectedListener { parent, position ->
+                viewModel.choosePriority(
+                    HabitPriority.fromString(
+                        parent.getItemAtPosition(position).toString()
+                    )
+                )
+            }
+        }
+    }
+
     private fun saveHabit() {
         with(viewBinding) {
             val habit = Habit(
+                id = "",
                 name = etHabitName.text.toString(),
                 description = etHabitDescription.text.toString(),
                 priority = viewModel.currentState.priority,
                 type = viewModel.currentState.type,
                 periodicity = etHabitPeriodicity.text.toString(),
                 numberOfExecutions = etNumberOfExecutions.text.toString(),
-                color = viewModel.currentState.pickedColor
+                color = viewModel.currentState.pickedColor,
+                date = Date().time / 1000
             )
             viewModel.addHabit(habit)
         }
@@ -102,7 +153,8 @@ class HabitFragment : BaseFragment<HabitState, HabitViewModel>(R.layout.fragment
                 type = viewModel.currentState.type,
                 periodicity = etHabitPeriodicity.text.toString(),
                 numberOfExecutions = etNumberOfExecutions.text.toString(),
-                color = viewModel.currentState.pickedColor
+                color = viewModel.currentState.pickedColor,
+                date = Date().time / 1000
             )
             viewModel.update(updatedHabit)
         }
@@ -236,33 +288,12 @@ class HabitFragment : BaseFragment<HabitState, HabitViewModel>(R.layout.fragment
         }
     }
 
-    private fun initViews() {
-        with(viewBinding) {
-            btnSave.setOnClickListener {
-                if (isValidate()) {
-                    if (!viewModel.currentState.isAddingMode) updateHabit() else saveHabit()
-                    findNavController().navigateUp()
-                    hideKeyboard()
-                    setFragmentResult(
-                        NUMBER_OF_TAB_KEY,
-                        bundleOf(NUMBER_OF_TAB to viewModel.currentState.type.numOfTab)
-                    )
-                }
-            }
-            rgHabitType.setOnCheckedChangeListener { radioGroup, checkedId ->
-                when (checkedId) {
-                    R.id.rb_good -> viewModel.chooseType(HabitType.GOOD)
-                    R.id.rb_bad -> viewModel.chooseType(HabitType.BAD)
-                }
-            }
+    private fun updateOptionsMenu() {
+        requireActivity().invalidateOptionsMenu()
+    }
 
-            spinnerHabitPriority.onItemSelectedListener { parent, position ->
-                viewModel.choosePriority(
-                    HabitPriority.fromString(
-                        parent.getItemAtPosition(position).toString()
-                    )
-                )
-            }
-        }
+    override fun init() {
+        super.init()
+        setHasOptionsMenu(true)
     }
 }

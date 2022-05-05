@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
+import ru.mikov.habittracker.ui.main.MainActivity
 
 abstract class BaseFragment<S, T : BaseViewModel<S>>(@LayoutRes layout: Int) :
     Fragment(layout) where S : IViewModelState {
 
+    val root: MainActivity
+        get() = activity as MainActivity
     abstract val viewModel: T
 
     abstract fun renderUi(data: S)
@@ -25,6 +28,8 @@ abstract class BaseFragment<S, T : BaseViewModel<S>>(@LayoutRes layout: Int) :
         super.onViewCreated(view, savedInstanceState)
         setupViews()
         viewModel.observeState(viewLifecycleOwner, ::renderUi)
+        viewModel.observeNotifications(viewLifecycleOwner) { root.renderNotification(it) }
+        viewModel.observeLoading(viewLifecycleOwner) { renderLoading(it) }
 
         observeViewModelData()
     }
@@ -32,5 +37,9 @@ abstract class BaseFragment<S, T : BaseViewModel<S>>(@LayoutRes layout: Int) :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         init()
+    }
+
+    private fun renderLoading(loadingState: Loading) {
+        root.renderLoading(loadingState)
     }
 }
