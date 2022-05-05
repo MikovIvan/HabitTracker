@@ -16,7 +16,6 @@ abstract class BaseViewModel<T : IViewModelState>(
         private const val REQUEST_RETRY_DELAY = 10000L
     }
 
-
     private val notifications = MutableLiveData<Event<Notify>>()
     private val loading = MutableLiveData(Loading.HIDE_LOADING)
 

@@ -10,6 +10,7 @@ import ru.mikov.habittracker.data.repositories.RootRepository
 import ru.mikov.habittracker.data.toHabit
 import ru.mikov.habittracker.ui.base.BaseViewModel
 import ru.mikov.habittracker.ui.base.IViewModelState
+import ru.mikov.habittracker.ui.base.Notify
 
 class HabitsViewModel(handle: SavedStateHandle) :
     BaseViewModel<HabitsState>(handle, HabitsState()) {
@@ -59,7 +60,7 @@ class HabitsViewModel(handle: SavedStateHandle) :
     }
 
     private fun getHabitsFromNetwork() {
-        launchSafety {
+        launchSafety(completeHandler = { notify(Notify.TextMessage("Data synchronized")) }) {
             val habits = repository.loadHabitsFromNetwork().map { it.toHabit() }
             repository.addHabitsToDb(habits)
         }
