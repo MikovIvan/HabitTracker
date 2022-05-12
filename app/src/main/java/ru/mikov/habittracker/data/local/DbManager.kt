@@ -7,7 +7,9 @@ import androidx.room.TypeConverters
 import ru.mikov.habittracker.App
 import ru.mikov.habittracker.BuildConfig
 import ru.mikov.habittracker.data.local.dao.HabitsDao
+import ru.mikov.habittracker.data.local.dao.HabitsUIDDao
 import ru.mikov.habittracker.data.local.entities.Habit
+import ru.mikov.habittracker.data.local.entities.HabitUID
 
 object DbManager {
     val db = Room.databaseBuilder(
@@ -18,7 +20,7 @@ object DbManager {
 }
 
 @Database(
-    entities = [Habit::class],
+    entities = [Habit::class, HabitUID::class],
     version = AppDb.DATABASE_VERSION,
     exportSchema = false,
     views = []
@@ -31,4 +33,5 @@ abstract class AppDb : RoomDatabase() {
     }
 
     abstract fun habitsDao(): HabitsDao
+    abstract fun habitsUIDDao(): HabitsUIDDao
 }

@@ -15,7 +15,7 @@ interface HabitsDao : BaseDao<Habit> {
         WHERE type = :type
     """
     )
-    fun findHabits(type: HabitType): LiveData<List<Habit>>
+    fun findHabitsByType(type: HabitType): LiveData<List<Habit>>
 
     @Query(
         """
@@ -32,4 +32,19 @@ interface HabitsDao : BaseDao<Habit> {
         """
     )
     suspend fun deleteHabit(id: String)
+
+    @Query(
+        """
+            SELECT * FROM habits
+            WHERE is_synchronized = 0
+        """
+    )
+    suspend fun findUnSyncHabits(): List<Habit>
+
+    @Query(
+        """
+        SELECT * FROM habits
+    """
+    )
+    suspend fun findAllHabits(): List<Habit>
 }

@@ -7,18 +7,14 @@ import androidx.lifecycle.Transformations
 import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.data.repositories.RootRepository
-import ru.mikov.habittracker.data.toHabit
 import ru.mikov.habittracker.ui.base.BaseViewModel
 import ru.mikov.habittracker.ui.base.IViewModelState
-import ru.mikov.habittracker.ui.base.Notify
 
 class HabitsViewModel(handle: SavedStateHandle) :
     BaseViewModel<HabitsState>(handle, HabitsState()) {
     private val repository = RootRepository
 
     init {
-        getHabitsFromNetwork()
-
         subscribeOnDataSource(repository.getHabitsByType(HabitType.GOOD)) { habits, state ->
             state.copy(goodHabits = habits)
         }
@@ -59,12 +55,6 @@ class HabitsViewModel(handle: SavedStateHandle) :
         return list
     }
 
-    private fun getHabitsFromNetwork() {
-        launchSafety(completeHandler = { notify(Notify.TextMessage("Data synchronized")) }) {
-            val habits = repository.loadHabitsFromNetwork().map { it.toHabit() }
-            repository.addHabitsToDb(habits)
-        }
-    }
 
     fun handleSearch(searchQuery: String) {
         updateState { it.copy(searchQuery = searchQuery) }

@@ -21,7 +21,9 @@ data class Habit(
     var date: Long,
     val color: Int,
     @ColumnInfo(name = "number_of_executions")
-    var numberOfExecutions: String
+    var numberOfExecutions: String,
+    @ColumnInfo(name = "is_synchronized")
+    var isSynchronized: Boolean = true
 ) : Serializable
 
 enum class HabitType(@StringRes val stringRes: Int, val numOfTab: Int, val id: Int) {

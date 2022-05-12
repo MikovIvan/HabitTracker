@@ -4,10 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.local.entities.HabitPriority
 import ru.mikov.habittracker.data.local.entities.HabitType
+import ru.mikov.habittracker.data.local.entities.HabitUID
+import ru.mikov.habittracker.data.remote.NetworkMonitor
 import ru.mikov.habittracker.data.repositories.RootRepository
 import ru.mikov.habittracker.ui.base.BaseViewModel
 import ru.mikov.habittracker.ui.base.IViewModelState
 import ru.mikov.habittracker.ui.base.Notify
+import java.util.*
 
 class HabitViewModel(
     handle: SavedStateHandle,
@@ -28,6 +31,7 @@ class HabitViewModel(
                 type = habit.type,
                 priority = habit.priority,
                 pickedColor = habit.color,
+                isSynchronized = habit.isSynchronized,
                 isHabitLoaded = false,
                 isHabitDeleted = false
             )
@@ -36,24 +40,51 @@ class HabitViewModel(
 
     fun addHabit(habit: Habit) {
         launchSafety(completeHandler = { updateState { it.copy(isHabitLoaded = true) } }) {
-            val id = repository.uploadHabitToNetwork(habit).uid
-            repository.addHabitToDb(habit.copy(id = id))
+            if (NetworkMonitor.isConnected) {
+                val id = repository.uploadHabitToNetwork(habit).uid
+                repository.addHabitToDb(habit.copy(id = id))
+            } else {
+                repository.addHabitToDb(
+                    habit.copy(
+                        id = UUID.randomUUID().toString(),
+                        isSynchronized = false
+                    )
+                )
+            }
         }
         notify(Notify.TextMessage("${habit.name} is added"))
     }
 
     fun update(habit: Habit) {
         launchSafety(completeHandler = { updateState { it.copy(isHabitLoaded = true) } }) {
-            repository.uploadHabitToNetwork(habit)
-            repository.updateHabit(habit)
+            if (NetworkMonitor.isConnected) {
+                repository.uploadHabitToNetwork(habit)
+                repository.updateHabit(habit.copy(isSynchronized = true))
+            } else {
+                repository.updateHabit(habit.copy(isSynchronized = false))
+            }
         }
         notify(Notify.TextMessage("${habit.name} is updated"))
     }
 
     fun deleteHabit(habitId: String) {
         launchSafety(completeHandler = { updateState { it.copy(isHabitDeleted = true) } }) {
-            repository.deleteHabitFromNetwork(habitId)
-            repository.deleteHabitFromDb(habitId)
+            when {
+                //если есть интернет
+                NetworkMonitor.isConnected -> {
+                    repository.deleteHabitFromNetwork(habitId)
+                    repository.deleteHabitFromDb(habitId)
+                }
+                //если нет интернета и привычка синхронизирована
+                currentState.isSynchronized -> {
+                    repository.addHabitUID(HabitUID(habitId))
+                    repository.deleteHabitFromDb(habitId)
+                }
+                //если нет интернета и привычка несинхронизирована
+                else -> {
+                    repository.deleteHabitFromDb(habitId)
+                }
+            }
         }
         notify(Notify.TextMessage("Habit is deleted"))
     }
@@ -81,6 +112,7 @@ data class HabitState(
     val type: HabitType = HabitType.GOOD,
     val priority: HabitPriority = HabitPriority.HIGH,
     val pickedColor: Int = -1,
+    val isSynchronized: Boolean = true,
     val isHabitLoaded: Boolean = false,
     val isHabitDeleted: Boolean = false
 ) : IViewModelState

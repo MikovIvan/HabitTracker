@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import ru.mikov.habittracker.data.local.DbManager.db
 import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.local.entities.HabitType
+import ru.mikov.habittracker.data.local.entities.HabitUID
 import ru.mikov.habittracker.data.remote.NetworkManager
 import ru.mikov.habittracker.data.remote.res.HabitRes
 import ru.mikov.habittracker.data.remote.res.HabitUIDRes
@@ -11,6 +12,7 @@ import ru.mikov.habittracker.data.toHabitRes
 
 object RootRepository {
     private var habitsDao = db.habitsDao()
+    private var habitsUIDDao = db.habitsUIDDao()
     private val network = NetworkManager.api
 
     suspend fun addHabitToDb(habit: Habit) {
@@ -25,12 +27,16 @@ object RootRepository {
         habitsDao.deleteHabit(habitId)
     }
 
+    suspend fun addHabitUID(habitUID: HabitUID) {
+        habitsUIDDao.insert(habitUID)
+    }
+
     fun getHabit(id: String): LiveData<Habit?> {
         return habitsDao.findHabitById(id)
     }
 
     fun getHabitsByType(type: HabitType): LiveData<List<Habit>> {
-        return habitsDao.findHabits(type)
+        return habitsDao.findHabitsByType(type)
     }
 
     suspend fun updateHabit(updatedHabit: Habit) {
@@ -47,6 +53,22 @@ object RootRepository {
 
     suspend fun deleteHabitFromNetwork(habitUID: String) {
         network.deleteHabit(HabitUIDRes(habitUID))
+    }
+
+    suspend fun isNoHabits(): Boolean {
+        return habitsDao.findAllHabits().isEmpty()
+    }
+
+    suspend fun getUnSyncHabits(): List<Habit> {
+        return habitsDao.findUnSyncHabits()
+    }
+
+    suspend fun getUIDToDelete(): List<HabitUID> {
+        return habitsUIDDao.getAllUID()
+    }
+
+    suspend fun clearUID() {
+        return habitsUIDDao.clear()
     }
 }
 

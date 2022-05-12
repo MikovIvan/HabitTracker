@@ -19,9 +19,12 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.snackbar.Snackbar
 import ru.mikov.habittracker.R
+import ru.mikov.habittracker.data.local.PrefManager
 import ru.mikov.habittracker.databinding.ActivityMainBinding
 import ru.mikov.habittracker.ui.base.Loading
 import ru.mikov.habittracker.ui.base.Notify
+import ru.mikov.habittracker.ui.extentions.gone
+import ru.mikov.habittracker.ui.extentions.visible
 
 
 class MainActivity : AppCompatActivity() {
@@ -89,6 +92,25 @@ class MainActivity : AppCompatActivity() {
     private fun observeViewModelData() {
         viewModel.observeLoading(this) { renderLoading(it) }
         viewModel.observeNotifications(this) { renderNotification(it) }
+        viewModel.observeConnection(this) { renderConnection(it) }
+    }
+
+    private fun renderConnection(isConnected: Boolean) {
+        with(viewBinding) {
+            when (isConnected) {
+                true -> {
+                    viewModel.synchronizeWithNetwork()
+                    navHostFragment.visible()
+                    statusButton.gone()
+                }
+                false -> {
+                    if (!PrefManager.isDbEmpty()) {
+                        navHostFragment.visible()
+                        statusButton.gone()
+                    }
+                }
+            }
+        }
     }
 
     private fun initNavigation() {

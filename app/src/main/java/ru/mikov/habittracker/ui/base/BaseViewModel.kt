@@ -3,6 +3,7 @@ package ru.mikov.habittracker.ui.base
 import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
+import ru.mikov.habittracker.data.remote.NetworkMonitor
 import ru.mikov.habittracker.data.remote.err.ApiError
 import ru.mikov.habittracker.data.remote.err.NoNetworkError
 import java.net.SocketTimeoutException
@@ -18,6 +19,7 @@ abstract class BaseViewModel<T : IViewModelState>(
 
     private val notifications = MutableLiveData<Event<Notify>>()
     private val loading = MutableLiveData(Loading.HIDE_LOADING)
+    private val connection = NetworkMonitor.isConnectedLive
 
     val state: MediatorLiveData<T> = MediatorLiveData<T>().apply {
         value = initState
@@ -48,11 +50,11 @@ abstract class BaseViewModel<T : IViewModelState>(
         notifications.value = Event(content)
     }
 
-    private fun showLoading(loadingType: Loading = Loading.SHOW_LOADING) {
+    fun showLoading(loadingType: Loading = Loading.SHOW_LOADING) {
         loading.value = loadingType
     }
 
-    private fun hideLoading() {
+    fun hideLoading() {
         loading.value = Loading.HIDE_LOADING
     }
 
@@ -65,21 +67,23 @@ abstract class BaseViewModel<T : IViewModelState>(
             EventObserver { onNotify(it) })
     }
 
+    fun observeConnection(owner: LifecycleOwner, onChanged: (isConnected: Boolean) -> Unit) {
+        connection.observe(owner, Observer { onChanged(it!!) })
+    }
+
     protected fun launchSafety(
         errHandler: ((Throwable) -> Unit)? = null,
         completeHandler: ((Throwable?) -> Unit)? = null,
-        block: suspend CoroutineScope.() -> Unit
+        request: suspend CoroutineScope.() -> Unit
     ) {
         val errHand = CoroutineExceptionHandler { _, err ->
             errHandler?.invoke(err) ?: when (err) {
                 is NoNetworkError -> {
-                    notify(Notify.ErrorMessage("Network not available, check internet connection"))
                     Log.e("Error", "Network not available, check internet connection")
                 }
 
                 is SocketTimeoutException -> {
-                    notify(Notify.ErrorMessage("Network timeout exception - trying again"))
-                    Log.e("Error", "Network timeout exception - please try again")
+                    Log.e("Error", "Network timeout exception - trying again")
                 }
 
                 is ApiError -> {
@@ -94,16 +98,14 @@ abstract class BaseViewModel<T : IViewModelState>(
         }
 
         (viewModelScope + errHand).launch {
-            showLoading()
-            block()
+            request()
         }.invokeOnCompletion {
             if (it != null) {
                 viewModelScope.launch {
                     delay(REQUEST_RETRY_DELAY)
-                    launchSafety(errHandler, completeHandler, block)
+                    launchSafety(errHandler, completeHandler, request)
                 }
             } else {
-                hideLoading()
                 completeHandler?.invoke(it)
             }
         }
@@ -123,7 +125,6 @@ class Event<out E>(private val content: E) {
 }
 
 class EventObserver<E>(private val onEventUnhandledContent: (E) -> Unit) : Observer<Event<E>> {
-
     override fun onChanged(event: Event<E>?) {
         event?.getContentIfNotHandled()?.let {
             onEventUnhandledContent(it)
