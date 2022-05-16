@@ -3,6 +3,7 @@ package ru.mikov.habittracker.ui.main
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import ru.mikov.habittracker.data.local.PrefManager
+import ru.mikov.habittracker.data.local.entities.Habit
 import ru.mikov.habittracker.data.repositories.RootRepository
 import ru.mikov.habittracker.data.toHabit
 import ru.mikov.habittracker.ui.base.BaseViewModel
@@ -34,10 +35,7 @@ class MainViewModel(handle: SavedStateHandle) : BaseViewModel<RootState>(handle,
         launchSafety {
             val unSyncHabits = repository.getUnSyncHabits()
             unSyncHabits.forEach { habit ->
-                repository.deleteHabitFromDb(habit.id)
-                val id = repository.uploadHabitToNetwork(habit.copy(id = "")).uid
-                repository.addHabitToDb(habit.copy(id = id, isSynchronized = true))
-                Log.d("SYNC", "$id uploaded to Server")
+                syncHabit(habit)
             }
             Log.d("SYNC", "All Habits uploaded to Server")
         }
@@ -56,6 +54,12 @@ class MainViewModel(handle: SavedStateHandle) : BaseViewModel<RootState>(handle,
         }
     }
 
+    private suspend fun syncHabit(habit: Habit) {
+        val id = repository.uploadHabitToNetwork(habit.copy(id = "")).uid
+        repository.deleteHabitFromDb(habit.id)
+        repository.addHabitToDb(habit.copy(id = id, isSynchronized = true))
+        Log.d("SYNC", "$id uploaded to Server")
+    }
 }
 
 data class RootState(

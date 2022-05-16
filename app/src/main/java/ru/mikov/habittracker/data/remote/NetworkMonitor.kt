@@ -3,56 +3,57 @@ package ru.mikov.habittracker.data.remote
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
-import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
 
 object NetworkMonitor {
     var isConnected: Boolean = false
     val isConnectedLive = MutableLiveData(false)
-    val networkTypeLive = MutableLiveData(NetworkType.NONE)
 
     private lateinit var cm: ConnectivityManager
 
     fun registerNetworkMonitor(ctx: Context) {
         cm = ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        obtainNetworkType(cm.activeNetwork?.let { cm.getNetworkCapabilities(it) })
-            .also { networkTypeLive.postValue(it) }
-
         cm.registerNetworkCallback(
             NetworkRequest.Builder().build(),
             object : ConnectivityManager.NetworkCallback() {
-                override fun onCapabilitiesChanged(
-                    network: Network,
-                    networkCapabilities: NetworkCapabilities
-                ) {
-                    networkTypeLive.postValue(obtainNetworkType(networkCapabilities))
-                }
-
                 override fun onLost(network: Network) {
                     isConnected = false
                     isConnectedLive.postValue(false)
-                    networkTypeLive.postValue(NetworkType.NONE)
                 }
 
                 override fun onAvailable(network: Network) {
-                    isConnected = true
-                    isConnectedLive.postValue(true)
+                    if (hasInternetConnected(ctx)) {
+                        isConnected = true
+                        isConnectedLive.postValue(true)
+                    } else {
+                        isConnected = false
+                        isConnectedLive.postValue(false)
+                    }
                 }
             }
         )
     }
 
-    fun obtainNetworkType(networkCapabilities: NetworkCapabilities?): NetworkType = when {
-        networkCapabilities == null -> NetworkType.NONE
-        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> NetworkType.WIFI
-        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> NetworkType.CELLULAR
-        else -> NetworkType.UNKNOWN
+    fun hasInternetConnected(context: Context): Boolean {
+        try {
+            val connection = URL("https://www.google.com").openConnection() as HttpURLConnection
+            connection.setRequestProperty("User-Agent", "Test")
+            connection.setRequestProperty("Connection", "close")
+            connection.connectTimeout = 1500 // configurable
+            connection.connect()
+            Log.d("InternetConnected", "hasInternetConnected: ${(connection.responseCode == 200)}")
+            return (connection.responseCode == 200)
+        } catch (e: IOException) {
+            Log.e("InternetConnected", "Error checking internet connection", e)
+        }
+        Log.d("InternetConnected", "hasInternetConnected: false")
+        return false
     }
 
-}
-
-enum class NetworkType {
-    NONE, UNKNOWN, WIFI, CELLULAR
 }

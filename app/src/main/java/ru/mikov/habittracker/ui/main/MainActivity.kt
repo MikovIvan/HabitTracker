@@ -104,6 +104,7 @@ class MainActivity : AppCompatActivity() {
                     statusButton.gone()
                 }
                 false -> {
+                    //через suspend из бд
                     if (!PrefManager.isDbEmpty()) {
                         navHostFragment.visible()
                         statusButton.gone()
