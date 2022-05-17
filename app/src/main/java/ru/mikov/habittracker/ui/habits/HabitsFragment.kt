@@ -11,7 +11,6 @@ import ru.mikov.habittracker.databinding.FragmentHabitsBinding
 import ru.mikov.habittracker.ui.ViewPagerFragmentDirections
 import ru.mikov.habittracker.ui.adapters.HabitAdapter
 import ru.mikov.habittracker.ui.base.BaseFragment
-import ru.mikov.habittracker.ui.extentions.registerAdapterDataObserver
 
 
 class HabitsFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fragment_habits) {
@@ -19,10 +18,15 @@ class HabitsFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fragm
     private val viewBinding: FragmentHabitsBinding by viewBinding()
     override val viewModel: HabitsViewModel by activityViewModels()
     private lateinit var habitType: HabitType
-    private var habitsAdapter: HabitAdapter = HabitAdapter {
-        val action = ViewPagerFragmentDirections.actionNavViewPagerToNavHabit(it.id)
-        findNavController().navigate(action)
-    }
+    private var habitsAdapter: HabitAdapter = HabitAdapter(
+        listener = {
+            val action = ViewPagerFragmentDirections.actionNavViewPagerToNavHabit(it.id)
+            findNavController().navigate(action)
+        },
+        listener2 = {
+            viewModel.doneHabit(it)
+        }
+    )
 
     override fun init() {
         habitType = arguments?.get(ARGS_TYPE) as HabitType
@@ -35,7 +39,7 @@ class HabitsFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fragm
                 adapter = habitsAdapter
 
                 //need to go to the start of the list after sort/add/delete item
-                habitsAdapter.registerAdapterDataObserver(this)
+//                habitsAdapter.registerAdapterDataObserver(this)
             }
         }
     }

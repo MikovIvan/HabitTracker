@@ -4,11 +4,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.Transformations
+import ru.mikov.habittracker.App
+import ru.mikov.habittracker.R
 import ru.mikov.habittracker.data.local.entities.Habit
+import ru.mikov.habittracker.data.local.entities.HabitDone
 import ru.mikov.habittracker.data.local.entities.HabitType
+import ru.mikov.habittracker.data.remote.NetworkMonitor
+import ru.mikov.habittracker.data.remote.res.HabitDoneRes
 import ru.mikov.habittracker.data.repositories.RootRepository
 import ru.mikov.habittracker.ui.base.BaseViewModel
 import ru.mikov.habittracker.ui.base.IViewModelState
+import ru.mikov.habittracker.ui.base.Notify
+import ru.mikov.habittracker.ui.extentions.quantityFromRes
+import java.util.*
 
 class HabitsViewModel(handle: SavedStateHandle) :
     BaseViewModel<HabitsState>(handle, HabitsState()) {
@@ -80,6 +88,48 @@ class HabitsViewModel(handle: SavedStateHandle) :
 
     fun chooseTabNumber(number: Int) {
         updateState { it.copy(numberOfTab = number) }
+    }
+
+    fun doneHabit(habit: Habit) {
+        launchSafety {
+            val date = (Date().time / 1000).toInt()
+            if (NetworkMonitor.isConnected) {
+                repository.updateHabit(
+                    habit.copy(
+                        doneDates = habit.doneDates.toMutableList().also { it.add(date) })
+                )
+                repository.doneHabit(HabitDoneRes(date, habit.id))
+            } else {
+                repository.updateHabit(
+                    habit.copy(
+                        doneDates = habit.doneDates.toMutableList().also { it.add(date) })
+                )
+                repository.addHabitDone(HabitDone(uid = habit.id, doneDate = date))
+            }
+            notify(Notify.TextMessage(getText(habit)))
+        }
+    }
+
+    private fun getText(habit: Habit, leftToDo: Int = habit.getLeftToDo()): String {
+        return when (habit.type) {
+            HabitType.GOOD -> if (leftToDo <= 0) {
+                App.applicationContext().resources.getString(R.string.habit_good_toast)
+            } else
+                App.applicationContext().quantityFromRes(
+                    R.plurals.habit_good_toast,
+                    habit.getLeftToDo(),
+                    habit.getLeftToDo()
+                )
+            HabitType.BAD -> if (leftToDo <= 0) {
+                App.applicationContext().resources.getString(R.string.habit_bad_toast)
+            } else {
+                App.applicationContext().quantityFromRes(
+                    R.plurals.habit_bad_toast,
+                    habit.getLeftToDo(),
+                    habit.getLeftToDo()
+                )
+            }
+        }
     }
 }
 

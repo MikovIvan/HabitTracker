@@ -7,8 +7,8 @@
     <string name="good">good</string>
     <string name="bad">bad</string>
     <string name="choose_habit_type">Choose habit type:</string>
-    <string name="enter_habit_periodicity">Enter habit periodicity</string>
-    <string name="enter_number_of_executions">Enter number of executions</string>
+    <string name="enter_habit_periodicity">Enter number of days</string>
+    <string name="enter_number_of_executions">Enter number of executions per day</string>
 
     <string name="rgb_formatted">R:%d G:%d B:%d</string>
     <string name="hsv_formatted">H:%f S:%f V:%f</string>
@@ -16,7 +16,7 @@
     <string name="btn_save_text">Save</string>
     <string name="tv_habit_name">Name of Habit: %1$s</string>
     <string name="tv_habit_description">Description: \n %1$s</string>
-    <string name="tv_habit_periodicity">Periodicity: %1$s</string>
+    <string name="tv_habit_periodicity">Number of days to complete: %1$s</string>
     <string name="tv_habit_priority">Priority: %1$s</string>
     <string name="type_good">Type: good</string>
     <string name="type_bad">Type: bad</string>
@@ -41,7 +41,25 @@
     <string name="low">Low</string>
     <string name="delete">delete</string>
     <string name="no_internet">no internet</string>
+    <string name="do_habit">do</string>
 
+    <plurals name="habit_good_toast">
+        <item quantity="one">Стоит выполнить ещё один раз</item>
+        <item quantity="few">Стоит выполнить ещё %d раза</item>
+        <item quantity="many">Стоит выполнить ещё %d раз</item>
+        <item quantity="other">Стоит выполнить ещё %d раз</item>
+    </plurals>
+
+    <string name="habit_good_toast">You\'re breathtaking</string>
+
+    <plurals name="habit_bad_toast">
+        <item quantity="one">Можете выполнить ещё один раз</item>
+        <item quantity="few">Можете выполнить ещё %d раза</item>
+        <item quantity="many">Можете выполнить ещё %d раз</item>
+        <item quantity="other">Можете выполнить ещё %d раз</item>
+    </plurals>
+
+    <string name="habit_bad_toast">Хватит это делать!</string>
 
     <string-array name="priority">
         <item>High</item>

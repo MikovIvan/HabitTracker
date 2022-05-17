@@ -64,5 +64,12 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="12" />
 
+        <Button
+            android:id="@+id/btn_done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/do_habit" />
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

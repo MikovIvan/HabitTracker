@@ -19,3 +19,18 @@ class HabitPriorityConverter {
     @TypeConverter
     fun fromPriorityHabit(value: HabitPriority) = value.name
 }
+
+class DoneDatesConverter {
+    @TypeConverter
+    fun fromDoneDates(value: List<Int>): String {
+        return value.joinToString(separator = ",")
+    }
+
+    @TypeConverter
+    fun toDoneDates(value: String): List<Int> {
+        return when {
+            value.isBlank() -> emptyList()
+            else -> value.split(",").map { it.trim().toInt() }
+        }
+    }
+}

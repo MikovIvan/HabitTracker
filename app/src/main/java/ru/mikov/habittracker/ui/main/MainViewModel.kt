@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import ru.mikov.habittracker.data.local.PrefManager
 import ru.mikov.habittracker.data.local.entities.Habit
+import ru.mikov.habittracker.data.local.entities.HabitDone
 import ru.mikov.habittracker.data.repositories.RootRepository
 import ru.mikov.habittracker.data.toHabit
+import ru.mikov.habittracker.data.toHabitDoneRes
 import ru.mikov.habittracker.ui.base.BaseViewModel
 import ru.mikov.habittracker.ui.base.IViewModelState
 
@@ -37,6 +39,10 @@ class MainViewModel(handle: SavedStateHandle) : BaseViewModel<RootState>(handle,
             unSyncHabits.forEach { habit ->
                 syncHabit(habit)
             }
+            val unSyncDoneDates = repository.getUnSyncDoneDates()
+            unSyncDoneDates.forEach { habitDone ->
+                syncDoneDates(habitDone)
+            }
             Log.d("SYNC", "All Habits uploaded to Server")
         }
     }
@@ -59,6 +65,11 @@ class MainViewModel(handle: SavedStateHandle) : BaseViewModel<RootState>(handle,
         repository.deleteHabitFromDb(habit.id)
         repository.addHabitToDb(habit.copy(id = id, isSynchronized = true))
         Log.d("SYNC", "$id uploaded to Server")
+    }
+
+    private suspend fun syncDoneDates(habitDone: HabitDone) {
+        repository.doneHabit(habitDone.toHabitDoneRes())
+        repository.deleteDoneDate(habitDone)
     }
 }
 

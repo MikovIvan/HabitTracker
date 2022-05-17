@@ -17,14 +17,25 @@ data class Habit(
     var description: String,
     var priority: HabitPriority,
     var type: HabitType,
+    //number of days
     var periodicity: String,
     var date: Long,
     val color: Int,
+    //number of executions per day
     @ColumnInfo(name = "number_of_executions")
     var numberOfExecutions: String,
     @ColumnInfo(name = "is_synchronized")
-    var isSynchronized: Boolean = true
-) : Serializable
+    var isSynchronized: Boolean = true,
+    @ColumnInfo(name = "done_dates")
+    var doneDates: List<Int> = emptyList()
+) : Serializable {
+
+    var totalCountOfExecutions: Int = numberOfExecutions.toInt() * periodicity.toInt()
+
+    fun getLeftToDo(): Int {
+        return totalCountOfExecutions - doneDates.size
+    }
+}
 
 enum class HabitType(@StringRes val stringRes: Int, val numOfTab: Int, val id: Int) {
     BAD(R.string.bad, 1, 1),

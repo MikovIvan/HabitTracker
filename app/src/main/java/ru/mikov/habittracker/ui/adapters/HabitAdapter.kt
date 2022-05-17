@@ -11,7 +11,8 @@ import ru.mikov.habittracker.data.local.entities.HabitType
 import ru.mikov.habittracker.databinding.ItemHabitBinding
 
 class HabitAdapter(
-    private val listener: (Habit) -> Unit
+    private val listener: (Habit) -> Unit,
+    private val listener2: (Habit) -> Unit
 ) : ListAdapter<Habit, HabitViewHolder>(HabitDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HabitViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -20,7 +21,7 @@ class HabitAdapter(
     }
 
     override fun onBindViewHolder(holder: HabitViewHolder, position: Int) =
-        holder.bind(getItem(position), listener)
+        holder.bind(getItem(position), listener, listener2)
 
 }
 
@@ -37,7 +38,8 @@ class HabitViewHolder(
 
     fun bind(
         habit: Habit,
-        listener: (Habit) -> Unit
+        listener: (Habit) -> Unit,
+        listener2: (Habit) -> Unit,
     ) {
 
         with(binding) {
@@ -60,6 +62,7 @@ class HabitViewHolder(
                 HabitType.BAD -> this@HabitViewHolder.itemView.context.getString(R.string.type_bad)
             }
             cvHabit.setCardBackgroundColor(habit.color)
+            btnDone.setOnClickListener { listener2.invoke(habit) }
         }
         itemView.setOnClickListener { listener.invoke(habit) }
     }

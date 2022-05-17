@@ -1,8 +1,10 @@
 package ru.mikov.habittracker.data
 
 import ru.mikov.habittracker.data.local.entities.Habit
+import ru.mikov.habittracker.data.local.entities.HabitDone
 import ru.mikov.habittracker.data.local.entities.HabitPriority
 import ru.mikov.habittracker.data.local.entities.HabitType
+import ru.mikov.habittracker.data.remote.res.HabitDoneRes
 import ru.mikov.habittracker.data.remote.res.HabitRes
 
 fun HabitRes.toHabit(): Habit =
@@ -15,7 +17,8 @@ fun HabitRes.toHabit(): Habit =
         periodicity = frequency.toString(),
         color = color,
         numberOfExecutions = count.toString(),
-        date = date.toLong()
+        date = date.toLong(),
+        doneDates = doneDates
     )
 
 fun Habit.toHabitRes(): HabitRes =
@@ -30,4 +33,10 @@ fun Habit.toHabitRes(): HabitRes =
         title = name,
         type = type.id,
         uid = id
+    )
+
+fun HabitDone.toHabitDoneRes(): HabitDoneRes =
+    HabitDoneRes(
+        date = doneDate,
+        habitUid = uid
     )
