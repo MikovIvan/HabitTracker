@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nav_habits"
-        android:name="ru.mikov.habittracker.ui.habits.HabitsFragment"
+        android:name="ru.mikov.habittracker.presentation.habits.HabitsFragment"
         android:label="@string/habits">
         <argument
             android:name="type"
@@ -17,21 +17,21 @@
     </fragment>
     <fragment
         android:id="@+id/nav_habit"
-        android:name="ru.mikov.habittracker.ui.habit.HabitFragment"
+        android:name="ru.mikov.habittracker.presentation.habit.HabitFragment"
         android:label="@string/habit">
         <argument
-            android:name="habitId"
+            android:name="habit_id"
             android:defaultValue=" "
             app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/nav_about"
-        android:name="ru.mikov.habittracker.ui.about.AboutFragment"
+        android:name="ru.mikov.habittracker.presentation.about.AboutFragment"
         android:label="@string/about"
         tools:layout="@layout/fragment_about" />
     <fragment
         android:id="@+id/nav_view_pager"
-        android:name="ru.mikov.habittracker.ui.ViewPagerFragment"
+        android:name="ru.mikov.habittracker.presentation.ViewPagerFragment"
         android:label="@string/habits"
         tools:layout="@layout/fragment_view_pager">
         <action
@@ -42,6 +42,6 @@
     </fragment>
     <dialog
         android:id="@+id/dialog_filter"
-        android:name="ru.mikov.habittracker.ui.dialogs.FilterDialog"
+        android:name="ru.mikov.habittracker.presentation.dialogs.FilterDialog"
         android:label="FilterDialog" />
 </navigation>

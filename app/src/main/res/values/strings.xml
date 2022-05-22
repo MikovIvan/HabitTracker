@@ -62,8 +62,8 @@
     <string name="habit_bad_toast">Хватит это делать!</string>
 
     <string-array name="priority">
-        <item>High</item>
-        <item>Medium</item>
         <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
     </string-array>
 </resources>
