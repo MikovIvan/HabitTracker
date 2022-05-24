@@ -15,8 +15,9 @@ import ru.mikov.habittracker.data.local.dao.HabitDoneDao
 import ru.mikov.habittracker.data.local.dao.HabitsDao
 import ru.mikov.habittracker.data.local.dao.HabitsUIDDao
 import ru.mikov.habittracker.data.remote.res.HabitUIDRes
+import javax.inject.Inject
 
-class RootRepositoryImpl(
+class RootRepositoryImpl @Inject constructor(
     private var habitsDao: HabitsDao,
     private var habitsUIDDao: HabitsUIDDao,
     private var habitDoneDao: HabitDoneDao,
@@ -43,7 +44,8 @@ class RootRepositoryImpl(
     }
 
     override fun getHabitsByType(typeDomain: HabitTypeDomain): Flow<List<Habit>> {
-        return habitsDao.findHabitsByType(typeDomain.toEntity()).map { it.map { it.toDomain() } }
+        return habitsDao.findHabitsByType(typeDomain.toEntity())
+            .map { list -> list.map { habit -> habit.toDomain() } }
     }
 
     override suspend fun updateHabit(updatedHabit: Habit) {

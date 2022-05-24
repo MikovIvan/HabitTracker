@@ -3,8 +3,9 @@ package ru.mikov.domain.usecase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import ru.mikov.domain.repository.RootRepository
+import javax.inject.Inject
 
-class IsNoHabitsUseCase(
+class IsNoHabitsUseCase @Inject constructor(
     private val repository: RootRepository,
     private val dispatcher: CoroutineDispatcher
 ) {

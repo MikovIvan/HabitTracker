@@ -4,8 +4,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import ru.mikov.domain.models.Habit
 import ru.mikov.domain.repository.RootRepository
+import javax.inject.Inject
 
-class UpdateHabitUseCase(
+class UpdateHabitUseCase @Inject constructor(
     private val repository: RootRepository,
     private val dispatcher: CoroutineDispatcher
 ) {

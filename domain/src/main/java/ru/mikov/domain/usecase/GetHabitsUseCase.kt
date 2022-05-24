@@ -6,8 +6,9 @@ import kotlinx.coroutines.flow.flowOn
 import ru.mikov.domain.models.Habit
 import ru.mikov.domain.models.HabitTypeDomain
 import ru.mikov.domain.repository.RootRepository
+import javax.inject.Inject
 
-class GetHabitsUseCase(
+class GetHabitsUseCase @Inject constructor(
     private val repository: RootRepository,
     private val dispatcher: CoroutineDispatcher
 ) {

@@ -17,7 +17,7 @@ import ru.mikov.data.local.entities.HabitPriority
 import ru.mikov.data.local.entities.HabitType
 import ru.mikov.domain.models.Habit
 import ru.mikov.habittracker.R
-import ru.mikov.habittracker.app.App
+import ru.mikov.habittracker.app.appComponent
 import ru.mikov.habittracker.databinding.FragmentHabitBinding
 import ru.mikov.habittracker.presentation.base.BaseFragment
 import ru.mikov.habittracker.presentation.extentions.hideKeyboard
@@ -35,7 +35,7 @@ class HabitFragment : BaseFragment<HabitState, HabitViewModel>(R.layout.fragment
 
     private val args: HabitFragmentArgs by navArgs()
     override val viewModel: HabitViewModel by lazyViewModel { stateHandle ->
-        (requireActivity().application as App).appComponent.habitViewModel()
+        requireContext().appComponent.habitViewModel()
             .create(stateHandle, args.habitId)
     }
     private val viewBinding: FragmentHabitBinding by viewBinding()
@@ -284,5 +284,6 @@ class HabitFragment : BaseFragment<HabitState, HabitViewModel>(R.layout.fragment
     override fun init() {
         super.init()
         setHasOptionsMenu(true)
+        requireContext().appComponent.subComponent().create().inject(this)
     }
 }

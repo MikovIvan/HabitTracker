@@ -5,8 +5,9 @@ import kotlinx.coroutines.withContext
 import ru.mikov.domain.models.Habit
 import ru.mikov.domain.models.HabitDone
 import ru.mikov.domain.repository.RootRepository
+import javax.inject.Inject
 
-class UploadUnSyncHabitsToServerUseCase(
+class UploadUnSyncHabitsToServerUseCase @Inject constructor(
     private val repository: RootRepository,
     private val dispatcher: CoroutineDispatcher
 ) {

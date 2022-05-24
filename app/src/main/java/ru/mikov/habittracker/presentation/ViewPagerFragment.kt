@@ -7,7 +7,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import ru.mikov.data.local.entities.HabitType
 import ru.mikov.habittracker.R
-import ru.mikov.habittracker.app.App
+import ru.mikov.habittracker.app.appComponent
 import ru.mikov.habittracker.databinding.FragmentViewPagerBinding
 import ru.mikov.habittracker.presentation.adapters.ViewPagerAdapter
 import ru.mikov.habittracker.presentation.base.BaseFragment
@@ -25,7 +25,7 @@ class ViewPagerFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fr
 
     private val viewBinding: FragmentViewPagerBinding by viewBinding()
     override val viewModel: HabitsViewModel by lazyActivityViewModel { stateHandle ->
-        (requireActivity().application as App).appComponent.habitsViewModel().create(stateHandle)
+        requireContext().appComponent.habitsViewModel().create(stateHandle)
     }
 
     override fun init() {
@@ -67,7 +67,6 @@ class ViewPagerFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fr
 
             viewPager.setCurrentItem(data.numberOfTab, false)
         }
-        //отдельную ливдату на таб
     }
 
     override fun setupViews() {

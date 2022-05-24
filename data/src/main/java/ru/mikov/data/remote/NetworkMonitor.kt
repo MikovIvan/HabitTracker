@@ -4,11 +4,13 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.InetSocketAddress
+import java.net.Socket
 
 class NetworkMonitor(val context: Context) {
 
@@ -31,32 +33,34 @@ class NetworkMonitor(val context: Context) {
                 }
 
                 override fun onAvailable(network: Network) {
-                    if (hasInternetConnected(context)) {
-                        isConnected = true
-                        isConnectedLive.postValue(true)
-                    } else {
-                        isConnected = false
-                        isConnectedLive.postValue(false)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if (InternetAvailability.check()) {
+                            withContext(Dispatchers.Main) {
+                                isConnected = true
+                                isConnectedLive.postValue(true)
+                            }
+                        } else {
+                            isConnected = false
+                            isConnectedLive.postValue(false)
+                        }
                     }
                 }
             }
         )
     }
+}
 
-    fun hasInternetConnected(context: Context): Boolean {
-        try {
-            val connection = URL("https://www.google.com").openConnection() as HttpURLConnection
-            connection.setRequestProperty("User-Agent", "Test")
-            connection.setRequestProperty("Connection", "close")
-            connection.connectTimeout = 1500 // configurable
-            connection.connect()
-            Log.d("InternetConnected", "hasInternetConnected: ${(connection.responseCode == 200)}")
-            return (connection.responseCode == 200)
-        } catch (e: IOException) {
-            Log.e("InternetConnected", "Error checking internet connection", e)
+object InternetAvailability {
+
+    fun check(): Boolean {
+        return try {
+            val socket = Socket()
+            socket.connect(InetSocketAddress("8.8.8.8", 53))
+            socket.close()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
-        Log.d("InternetConnected", "hasInternetConnected: false")
-        return false
     }
-
 }

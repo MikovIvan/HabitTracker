@@ -1,8 +1,8 @@
 package ru.mikov.data.remote
 
 import retrofit2.http.*
+import ru.mikov.data.remote.res.HabitRes
 import ru.mikov.habittracker.data.remote.res.HabitDoneRes
-import ru.mikov.habittracker.data.remote.res.HabitRes
 import ru.mikov.habittracker.data.remote.res.HabitUIDRes
 
 interface RestService {

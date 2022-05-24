@@ -11,19 +11,19 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import ru.mikov.habittracker.presentation.base.Factory
+import ru.mikov.habittracker.presentation.base.ViewModelFactory
 
 inline fun <reified T : ViewModel> Fragment.lazyViewModel(
     noinline create: (stateHandle: SavedStateHandle) -> T
-) = viewModels<T> { Factory(this, create) }
+) = viewModels<T> { ViewModelFactory(this, create) }
 
 inline fun <reified T : ViewModel> Fragment.lazyActivityViewModel(
     noinline create: (stateHandle: SavedStateHandle) -> T
-) = activityViewModels<T> { Factory(this, create) }
+) = activityViewModels<T> { ViewModelFactory(this, create) }
 
 inline fun <reified T : ViewModel> ComponentActivity.lazyViewModel(
     noinline create: (stateHandle: SavedStateHandle) -> T,
-) = viewModels<T> { Factory(this, create) }
+) = viewModels<T> { ViewModelFactory(this, create) }
 
 fun Fragment.hideKeyboard() {
     view?.let { activity?.hideKeyboard(it) }

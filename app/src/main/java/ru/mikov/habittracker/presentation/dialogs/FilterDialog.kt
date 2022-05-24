@@ -9,7 +9,7 @@ import android.view.inputmethod.EditorInfo
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ru.mikov.habittracker.R
-import ru.mikov.habittracker.app.App
+import ru.mikov.habittracker.app.appComponent
 import ru.mikov.habittracker.databinding.BottomSheetBinding
 import ru.mikov.habittracker.presentation.extentions.lazyActivityViewModel
 import ru.mikov.habittracker.presentation.habits.HabitsViewModel
@@ -20,7 +20,12 @@ class FilterDialog : BottomSheetDialogFragment() {
 
     private val viewBinding: BottomSheetBinding by viewBinding()
     val viewModel: HabitsViewModel by lazyActivityViewModel { stateHandle ->
-        (requireActivity().application as App).appComponent.habitsViewModel().create(stateHandle)
+        requireContext().appComponent.habitsViewModel().create(stateHandle)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requireContext().appComponent.subComponent().create().inject(this)
     }
 
     override fun onCreateView(

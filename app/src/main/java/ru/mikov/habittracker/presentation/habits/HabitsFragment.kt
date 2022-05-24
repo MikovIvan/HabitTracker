@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import ru.mikov.data.local.entities.HabitType
 import ru.mikov.habittracker.R
-import ru.mikov.habittracker.app.App
+import ru.mikov.habittracker.app.appComponent
 import ru.mikov.habittracker.databinding.FragmentHabitsBinding
 import ru.mikov.habittracker.presentation.ViewPagerFragmentDirections
 import ru.mikov.habittracker.presentation.adapters.HabitAdapter
@@ -18,7 +18,7 @@ class HabitsFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fragm
 
     private val viewBinding: FragmentHabitsBinding by viewBinding()
     override val viewModel: HabitsViewModel by lazyActivityViewModel { stateHandle ->
-        (requireActivity().application as App).appComponent.habitsViewModel().create(stateHandle)
+        requireContext().appComponent.habitsViewModel().create(stateHandle)
     }
     private lateinit var habitType: HabitType
     private var habitsAdapter: HabitAdapter = HabitAdapter(
@@ -33,6 +33,7 @@ class HabitsFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fragm
 
     override fun init() {
         habitType = arguments?.get(ARGS_TYPE) as HabitType
+        requireContext().appComponent.subComponent().create().inject(this)
     }
 
     override fun setupViews() {

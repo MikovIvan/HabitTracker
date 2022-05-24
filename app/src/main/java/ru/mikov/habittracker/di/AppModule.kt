@@ -1,14 +1,6 @@
 package ru.mikov.habittracker.di
 
-import android.content.Context
 import dagger.Module
-import dagger.Provides
 
-@Module
-class AppModule(val context: Context) {
-
-    @Provides
-    fun provideContext(): Context {
-        return context
-    }
-}
+@Module(subcomponents = [SubComponent::class])
+class AppModule

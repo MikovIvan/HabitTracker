@@ -19,7 +19,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.snackbar.Snackbar
 import ru.mikov.data.local.PrefManager
 import ru.mikov.habittracker.R
-import ru.mikov.habittracker.app.App
+import ru.mikov.habittracker.app.appComponent
 import ru.mikov.habittracker.databinding.ActivityMainBinding
 import ru.mikov.habittracker.presentation.base.Loading
 import ru.mikov.habittracker.presentation.base.Notify
@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     private val viewBinding: ActivityMainBinding by viewBinding()
     private val viewModel: MainViewModel by lazyViewModel { stateHandle ->
-        (applicationContext as App).appComponent.mainViewModel().create(stateHandle)
+        appComponent.mainViewModel().create(stateHandle)
     }
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(viewBinding.toolbar)
 
-        (applicationContext as App).appComponent.inject(this)
+        appComponent.inject(this)
 
         initNavigation()
         initAvatar()
@@ -103,18 +103,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderConnection(isConnected: Boolean) {
         with(viewBinding) {
-            when (isConnected) {
-                true -> {
-                    viewModel.synchronizeWithNetwork()
+            if (isConnected) {
+                viewModel.synchronizeWithNetwork()
+                navHostFragment.visible()
+                statusButton.gone()
+            } else {
+                if (!PrefManager(this@MainActivity).isDbEmpty()) {
                     navHostFragment.visible()
                     statusButton.gone()
-                }
-                false -> {
-                    //через suspend из бд
-                    if (!PrefManager(applicationContext).isDbEmpty()) {
-                        navHostFragment.visible()
-                        statusButton.gone()
-                    }
                 }
             }
         }
