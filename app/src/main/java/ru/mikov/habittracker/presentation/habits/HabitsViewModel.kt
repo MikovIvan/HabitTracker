@@ -4,11 +4,15 @@ import androidx.lifecycle.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ru.mikov.data.local.entities.HabitType
 import ru.mikov.data.mappers.toDomain
 import ru.mikov.data.mappers.toEntity
 import ru.mikov.data.remote.NetworkMonitor.Companion.isConnected
 import ru.mikov.domain.models.Habit
+import ru.mikov.domain.repository.Resource
 import ru.mikov.domain.usecase.DoneHabitUseCase
 import ru.mikov.domain.usecase.GetHabitsUseCase
 import ru.mikov.habittracker.R
@@ -97,9 +101,20 @@ class HabitsViewModel @AssistedInject constructor(
     }
 
     fun doneHabit(habit: Habit) {
-        launchSafety {
-            doneHabitUseCase.doneHabit(habit, isConnected)
-            notify(Notify.TextMessage(getText(habit)))
+        viewModelScope.launch {
+            doneHabitUseCase.invoke(habit, isConnected).onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        notify(Notify.TextMessage(getText(result.data!!)))
+                    }
+                    is Resource.Error -> {
+                        notify(Notify.TextMessage(result.message!!))
+                    }
+                    is Resource.Loading -> {
+
+                    }
+                }
+            }.collect()
         }
     }
 

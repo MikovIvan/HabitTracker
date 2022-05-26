@@ -21,11 +21,11 @@ interface RootRepository {
 
     suspend fun updateHabit(updatedHabit: Habit)
 
-    suspend fun uploadHabitToNetwork(habit: Habit): HabitUID
+    suspend fun uploadHabitToNetwork(habit: Habit): Flow<HabitUID>
 
-    suspend fun loadHabitsFromNetwork(): List<Habit>
+    suspend fun loadHabitsFromNetwork(): Flow<List<Habit>>
 
-    suspend fun deleteHabitFromNetwork(habitUID: String)
+    suspend fun deleteHabitFromNetwork(habitUID: String): Flow<Unit>
 
     suspend fun isNoHabits(): Boolean
 
@@ -35,11 +35,17 @@ interface RootRepository {
 
     suspend fun clearUID()
 
-    suspend fun doneHabit(habitDoneRes: HabitDone)
+    suspend fun doneHabit(habitDoneRes: HabitDone): Flow<Unit>
 
     suspend fun getUnSyncDoneDates(): List<HabitDone>
 
     suspend fun addHabitDone(habitDone: HabitDone)
 
     suspend fun deleteDoneDate(habitDone: HabitDone)
+}
+
+sealed class Resource<T>(val data: T? = null, val message: String? = null) {
+    class Success<T>(data: T?) : Resource<T>(data)
+    class Error<T>(message: String, data: T? = null) : Resource<T>(data, message)
+    class Loading<T>(val isLoading: Boolean = true) : Resource<T>(null)
 }

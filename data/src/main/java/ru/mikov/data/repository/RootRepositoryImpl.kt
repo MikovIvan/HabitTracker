@@ -1,6 +1,7 @@
 package ru.mikov.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import ru.mikov.data.mappers.toDomain
 import ru.mikov.data.mappers.toEntity
@@ -52,16 +53,22 @@ class RootRepositoryImpl @Inject constructor(
         habitsDao.update(updatedHabit.toEntity())
     }
 
-    override suspend fun uploadHabitToNetwork(habit: Habit): HabitUID {
-        return api.addHabit(habit.toResponse()).toDomain()
+    override suspend fun uploadHabitToNetwork(habit: Habit): Flow<HabitUID> {
+        return flow {
+            api.addHabit(habit.toResponse()).toDomain()
+        }
     }
 
-    override suspend fun loadHabitsFromNetwork(): List<Habit> {
-        return api.habits().map { it.toDomain() }
+    override suspend fun loadHabitsFromNetwork(): Flow<List<Habit>> {
+        return flow {
+            emit(api.habits().map { it.toDomain() })
+        }
     }
 
-    override suspend fun deleteHabitFromNetwork(habitUID: String) {
-        api.deleteHabit(HabitUIDRes(habitUID))
+    override suspend fun deleteHabitFromNetwork(habitUID: String): Flow<Unit> {
+        return flow {
+            emit(api.deleteHabit(HabitUIDRes(habitUID)))
+        }
     }
 
     override suspend fun isNoHabits(): Boolean {
@@ -80,8 +87,10 @@ class RootRepositoryImpl @Inject constructor(
         return habitsUIDDao.clear()
     }
 
-    override suspend fun doneHabit(habitDoneRes: HabitDone) {
-        api.completeHabit(habitDoneRes.toResponse())
+    override suspend fun doneHabit(habitDoneRes: HabitDone): Flow<Unit> {
+        return flow {
+            api.completeHabit(habitDoneRes.toResponse())
+        }
     }
 
     override suspend fun getUnSyncDoneDates(): List<HabitDone> {

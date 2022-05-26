@@ -1,12 +1,9 @@
 package ru.mikov.habittracker.presentation.base
 
-import android.util.Log
 import androidx.lifecycle.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import ru.mikov.data.remote.NetworkMonitor
-import ru.mikov.habittracker.data.remote.err.ApiError
-import ru.mikov.habittracker.data.remote.err.NoNetworkError
-import java.net.SocketTimeoutException
 
 abstract class BaseViewModel<T : IViewModelState>(
     private val handleState: SavedStateHandle,
@@ -72,42 +69,13 @@ abstract class BaseViewModel<T : IViewModelState>(
     }
 
     protected fun launchSafety(
-        errHandler: ((Throwable) -> Unit)? = null,
         completeHandler: ((Throwable?) -> Unit)? = null,
         request: suspend CoroutineScope.() -> Unit
     ) {
-        val errHand = CoroutineExceptionHandler { _, err ->
-            errHandler?.invoke(err) ?: when (err) {
-                is NoNetworkError -> {
-                    Log.e("Error", "Network not available, check internet connection")
-                }
-
-                is SocketTimeoutException -> {
-                    Log.e("Error", "Network timeout exception - trying again")
-                }
-
-                is ApiError -> {
-                    notify(Notify.ErrorMessage(err.message))
-                    Log.e("Error", err.message)
-                }
-                else -> {
-                    notify(Notify.ErrorMessage(err.message ?: "Something wrong"))
-                    Log.e("Error", err.message ?: "Something wrong")
-                }
-            }
-        }
-
-        (viewModelScope + errHand).launch {
+        viewModelScope.launch {
             request()
         }.invokeOnCompletion {
-            if (it != null) {
-                viewModelScope.launch {
-                    delay(REQUEST_RETRY_DELAY)
-                    launchSafety(errHandler, completeHandler, request)
-                }
-            } else {
-                completeHandler?.invoke(it)
-            }
+            completeHandler?.invoke(it)
         }
     }
 }

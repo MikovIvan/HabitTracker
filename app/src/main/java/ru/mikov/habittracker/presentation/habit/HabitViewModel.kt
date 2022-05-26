@@ -2,13 +2,18 @@ package ru.mikov.habittracker.presentation.habit
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ru.mikov.data.local.entities.HabitPriority
 import ru.mikov.data.local.entities.HabitType
 import ru.mikov.data.remote.NetworkMonitor
 import ru.mikov.domain.models.Habit
+import ru.mikov.domain.repository.Resource
 import ru.mikov.domain.usecase.DeleteHabitUseCase
 import ru.mikov.domain.usecase.GetHabitUseCase
 import ru.mikov.domain.usecase.SaveHabitUseCase
@@ -47,28 +52,61 @@ class HabitViewModel @AssistedInject constructor(
     }
 
     fun addHabit(habit: Habit) {
-        launchSafety(completeHandler = { updateState { it.copy(isHabitLoaded = true) } }) {
-            saveHabitUseCase.save(habit, NetworkMonitor.isConnected)
-        }
-        notify(Notify.TextMessage("${habit.title} is added"))
+        viewModelScope.launch {
+            saveHabitUseCase.invoke(habit, NetworkMonitor.isConnected).onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        notify(Notify.TextMessage("${habit.title} is added"))
+                    }
+                    is Resource.Error -> {
+                        notify(Notify.ErrorMessage(result.message!!))
+                    }
+                    is Resource.Loading -> {
+
+                    }
+                }
+            }.collect()
+        }.invokeOnCompletion { updateState { it.copy(isHabitLoaded = true) } }
     }
 
     fun update(habit: Habit) {
-        launchSafety(completeHandler = { updateState { it.copy(isHabitLoaded = true) } }) {
-            updateHabitUseCase.update(habit, NetworkMonitor.isConnected)
-        }
-        notify(Notify.TextMessage("${habit.title} is updated"))
+        viewModelScope.launch {
+            updateHabitUseCase.update(habit, NetworkMonitor.isConnected).onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        notify(Notify.TextMessage("${habit.title} is updated"))
+                    }
+                    is Resource.Error -> {
+                        notify(Notify.ErrorMessage(result.message!!))
+                    }
+                    is Resource.Loading -> {
+
+                    }
+                }
+            }.collect()
+        }.invokeOnCompletion { updateState { it.copy(isHabitLoaded = true) } }
     }
 
     fun deleteHabit(habitId: String) {
-        launchSafety(completeHandler = { updateState { it.copy(isHabitDeleted = true) } }) {
-            deleteHabitUseCase.deleteHabit(
+        viewModelScope.launch {
+            deleteHabitUseCase.invoke(
                 habitId,
                 NetworkMonitor.isConnected,
                 currentState.isSynchronized
-            )
-        }
-        notify(Notify.TextMessage("Habit is deleted"))
+            ).onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        notify(Notify.TextMessage("Habit ${result.data} is deleted"))
+                    }
+                    is Resource.Error -> {
+                        notify(Notify.ErrorMessage(result.message!!))
+                    }
+                    is Resource.Loading -> {
+
+                    }
+                }
+            }.collect()
+        }.invokeOnCompletion { updateState { it.copy(isHabitDeleted = true) } }
     }
 
     fun chooseType(habitType: HabitType) {
