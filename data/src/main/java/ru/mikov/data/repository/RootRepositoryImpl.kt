@@ -55,7 +55,7 @@ class RootRepositoryImpl @Inject constructor(
 
     override suspend fun uploadHabitToNetwork(habit: Habit): Flow<HabitUID> {
         return flow {
-            api.addHabit(habit.toResponse()).toDomain()
+            emit(api.addHabit(habit.toResponse()).toDomain())
         }
     }
 
@@ -89,7 +89,7 @@ class RootRepositoryImpl @Inject constructor(
 
     override suspend fun doneHabit(habitDoneRes: HabitDone): Flow<Unit> {
         return flow {
-            api.completeHabit(habitDoneRes.toResponse())
+            emit(api.completeHabit(habitDoneRes.toResponse()))
         }
     }
 

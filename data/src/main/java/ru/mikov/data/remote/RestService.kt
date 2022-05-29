@@ -26,6 +26,7 @@ interface RestService {
     )
 
     companion object {
+        //посмотреть flavours
         const val BASE_URL = "https://droid-test-server.doubletapp.ru/api/"
         const val API_KEY = "21b5dfd9-f8ea-4018-b17e-a541a4d5aaf8"
     }

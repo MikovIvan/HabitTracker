@@ -44,12 +44,14 @@ class DoneHabitUseCase @Inject constructor(
                         )
                         emit(Resource.Success(data = habit))
                     }
+
             } else {
                 repository.updateHabit(
                     habit.copy(
                         doneDates = habit.doneDates.toMutableList().also { it.add(date) })
                 )
                 repository.addHabitDone(HabitDone(habitUid = habit.uid, date = date))
+                emit(Resource.Success(data = habit))
             }
         }.flowOn(dispatcher)
     }

@@ -6,6 +6,7 @@ import ru.mikov.domain.models.HabitDone
 import ru.mikov.domain.models.HabitTypeDomain
 import ru.mikov.domain.models.HabitUID
 
+//лучше делить
 interface RootRepository {
     suspend fun addHabitToDb(habit: Habit)
 
