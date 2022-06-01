@@ -1,4 +1,4 @@
-package ru.mikov.habittracker.data.local.entities
+package ru.mikov.data.local.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

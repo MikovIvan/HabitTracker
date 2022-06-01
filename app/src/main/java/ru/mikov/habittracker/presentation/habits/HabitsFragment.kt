@@ -12,6 +12,7 @@ import ru.mikov.habittracker.presentation.ViewPagerFragmentDirections
 import ru.mikov.habittracker.presentation.adapters.HabitAdapter
 import ru.mikov.habittracker.presentation.base.BaseFragment
 import ru.mikov.habittracker.presentation.extentions.lazyActivityViewModel
+import ru.mikov.habittracker.presentation.extentions.registerAdapterDataObserver
 
 
 class HabitsFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fragment_habits) {
@@ -43,7 +44,7 @@ class HabitsFragment : BaseFragment<HabitsState, HabitsViewModel>(R.layout.fragm
                 adapter = habitsAdapter
 
                 //need to go to the start of the list after sort/add/delete item
-//                habitsAdapter.registerAdapterDataObserver(this)
+                habitsAdapter.registerAdapterDataObserver(this)
             }
         }
     }
